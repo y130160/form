@@ -6,17 +6,14 @@
 </head>
 <body>
 <script>
-// פונקציה להצגת השאלות ואיסוף התשובות
 async function askQuestions() {
   const answers = {};
   
-  // ערוך את השאלות לפי הצורך שלך
   answers.fullName = prompt("מה השם המלא שלך?");
   answers.phone = prompt("מה מספר הטלפון שלך?");
   answers.comments = prompt("האם יש לך הערות נוספות?");
 
-  // שליחת התשובות ל-Webhook של Make
-  await fetch('https://hook.eu2.make.com/n97tifs14z8a5bkiu96z1buh7g1u9lsg', { // הכנס פה את ה-webhook האמיתי שלך
+  await fetch('https://hook.make.com/your-real-webhook-url', { // הכנס פה את ה-webhook האמיתי שלך
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -25,11 +22,10 @@ async function askQuestions() {
   });
 
   alert('התשובות שלך נשלחו בהצלחה, תודה!');
-  window.close();
+
+  window.close(); // <-- השורה הזו סוגרת את הכרטיסייה
 }
 
-
-// הפעל את הפונקציה בעת פתיחת הדף
 askQuestions();
 </script>
 </body>
