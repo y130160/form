@@ -54,7 +54,7 @@
     const documentType = getQueryParam("documentType");
     
     if (destination && documentType) {
-      document.getElementById("confirmationMessage").innerText = `בעוד כמה דקות ישלח ל${destination} ה${documentType} שביקשתם`;
+      document.getElementById("confirmationMessage").innerText = `בעוד כמה דקות ישלח ל${destination} ${documentType} שביקשתם`;
     } else {
       document.getElementById("confirmationMessage").innerText = "שגיאה: מידע חסר";
     }
