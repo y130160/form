@@ -61,7 +61,7 @@
       cursor: pointer;
       border-radius: 12px;
       text-align: center;
-      display: block;
+      display: none;
       margin: 0 auto;
     }
 
@@ -80,16 +80,16 @@
     <label>לשלוח לפקס/מייל</label>
     <select id="sendMethod">
       <option value="" selected disabled>בחר אפשרות</option>
-      <option value="פקס">פקס</option>
       <option value="מייל">מייל</option>
+      <option value="פקס">פקס</option>
     </select>
 
     <div id="faxOptions" style="display: none;">
       <label>מספר הפקס אליו ישלחו המסמכים</label>
       <select id="faxNumber">
-        <option value="" selected disabled>בחר מספר פקס</option>
-        <option value="כולל מזומנים">כולל מזומנים</option>
-        <option value="ראה\"כ">ראה"כ</option>
+        <option value="" selected disabled>בחר פקס</option>
+        <option value="035711778">כולל מזומנים</option>
+        <option value="038078810">ראה"כ</option>
         <option value="אחר">אחר</option>
       </select>
       <input type="text" id="customFax" placeholder="הכנס מספר פקס" style="display: none;">
@@ -98,10 +98,10 @@
     <div id="emailOptions" style="display: none;">
       <label>לאיזה מייל לשלוח את המסמכים?</label>
       <select id="emailAddress">
-        <option value="" selected disabled>בחר כתובת מייל</option>
-        <option value="כולל מזומנים">כולל מזומנים</option>
-        <option value="ראה\"כ">ראה"כ</option>
-        <option value="מזכ"ל">מזכ"ל</option>
+        <option value="" selected disabled>בחר מייל</option>
+        <option value="m035711778@gmail.com">כולל מזומנים</option>
+        <option value="t038078810@gmail.com">ראה"כ</option>
+        <option value="32218gk@gmail.com">מזכ"ל</option>
         <option value="אחר">אחר</option>
       </select>
       <input type="email" id="customEmail" placeholder="הכנס כתובת מייל" style="display: none;">
@@ -114,11 +114,11 @@
         <option value="רשימת אברכי הכולל">רשימת אברכי הכולל</option>
         <option value="מסכתות משבצות">מסכתות משבצות</option>
         <option value="דפי שימור">דפי שימור</option>
-        <option value="דו"ח חודשי">דו"ח חודשי</option>
+        <option value="דוח חודשי">דו"ח חודשי</option>
       </select>
     </div>
 
-    <button type="submit" style="display: none;">שלח פרטים</button>
+    <button type="submit">שלח פרטים</button>
   </form>
 </div>
 
@@ -126,21 +126,49 @@
   document.getElementById("sendMethod").addEventListener("change", function() {
     document.getElementById("faxOptions").style.display = this.value === "פקס" ? "block" : "none";
     document.getElementById("emailOptions").style.display = this.value === "מייל" ? "block" : "none";
-  });
+});
 
-  document.getElementById("faxNumber").addEventListener("change", function() {
+document.getElementById("faxNumber").addEventListener("change", function() {
     document.getElementById("customFax").style.display = this.value === "אחר" ? "block" : "none";
     document.getElementById("documentSection").style.display = "block";
-  });
+});
 
-  document.getElementById("emailAddress").addEventListener("change", function() {
+document.getElementById("emailAddress").addEventListener("change", function() {
     document.getElementById("customEmail").style.display = this.value === "אחר" ? "block" : "none";
     document.getElementById("documentSection").style.display = "block";
-  });
+});
 
-  document.getElementById("documentType").addEventListener("change", function() {
+document.getElementById("documentType").addEventListener("change", function() {
     document.querySelector("button[type=submit]").style.display = "block";
-  });
+});
+
+document.getElementById("userForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const sendMethod = document.getElementById("sendMethod").value;
+    let destination = sendMethod === "פקס" ? document.getElementById("faxNumber").value : document.getElementById("emailAddress").value;
+    if (destination === "אחר") {
+        destination = sendMethod === "פקס" ? document.getElementById("customFax").value : document.getElementById("customEmail").value;
+    }
+    const documentType = document.getElementById("documentType").value;
+
+    const answers = {
+        sendMethod,
+        destination,
+        documentType
+    };
+
+    await fetch("https://hook.eu2.make.com/n97tifs14z8a5bkiu96z1buh7g1u9lsg", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(answers)
+    });
+
+    window.location.href = `https://y130160.github.io/form/תשובה.html?destination=${encodeURIComponent(destination)}&documentType=${encodeURIComponent(documentType)}`;
+});
+
 </script>
 
 </body>
