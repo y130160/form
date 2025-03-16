@@ -9,11 +9,11 @@
 async function askQuestions() {
   const answers = {};
   
-  answers.fullName = prompt("מה השם המלא שלך?");
+  answers.fullName = prompt("איזה רשימה?");
   answers.phone = prompt("מה מספר הטלפון שלך?");
   answers.comments = prompt("האם יש לך הערות נוספות?");
 
-  await fetch('https://hook.make.com/your-real-webhook-url', { // הכנס פה את ה-webhook האמיתי שלך
+  await fetch('https://hook.eu2.make.com/n97tifs14z8a5bkiu96z1buh7g1u9lsg', { // הכנס פה את ה-webhook האמיתי שלך
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -21,9 +21,7 @@ async function askQuestions() {
     body: JSON.stringify(answers)
   });
 
-  alert('התשובות שלך נשלחו בהצלחה, תודה!');
-
-  window.close(); // <-- השורה הזו סוגרת את הכרטיסייה
+  alert('התשובות שלך נשלחו בהצלחה, תודה! אפשר לסגור את החלון כעת');
 }
 
 askQuestions();
