@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>שאלון למשתמש</title>
+</head>
+<body>
+<script>
+// פונקציה להצגת השאלות ואיסוף התשובות
+async function askQuestions() {
+  const answers = {};
+  
+  // ערוך את השאלות לפי הצורך שלך
+  answers.fullName = prompt("מה השם המלא שלך?");
+  answers.phone = prompt("מה מספר הטלפון שלך?");
+  answers.comments = prompt("האם יש לך הערות נוספות?");
+
+  // שליחת התשובות ל-Webhook של Make
+  await fetch('https://hook.eu2.make.com/n97tifs14z8a5bkiu96z1buh7g1u9lsg', { // הכנס פה את ה-webhook האמיתי שלך
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(answers)
+  });
+
+  alert('התשובות שלך נשלחו בהצלחה, תודה!');
+}
+
+// הפעל את הפונקציה בעת פתיחת הדף
+askQuestions();
+</script>
+</body>
+</html>
