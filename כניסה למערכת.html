@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>התחברות למערכת</title>
+  <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://y130160.github.io/form/לוגו בני ברק.png">
+  <style>
+    body {
+      font-family: 'Times New Roman', serif;
+      background-color: #f8f9fa;
+      text-align: center;
+      padding-top: 50px;
+      direction: rtl;
+    }
+    .container {
+      width: 90%;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    img.logo {
+      width: 100px;
+      margin-bottom: 15px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 16px;
+      text-align: right;
+    }
+    button {
+      background-color: #b8860b; /* זהב כהה */
+      color: white;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      border-radius: 12px;
+      text-align: center;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #a07608;
+    }
+    #errorMessage {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו המוסד">
+  <h2>ברוך הבא למערכת כולל מזומנים בני ברק</h2>
+  <form id="loginForm">
+    <input type="text" id="username" placeholder="שם משתמש" required>
+    <input type="password" id="password" placeholder="סיסמא" required>
+    <button type="submit">כניסה למערכת</button>
+  </form>
+  <div id="errorMessage"></div>
+</div>
+
+<script>
+  // הגדרות חיבור ל-Airtable עבור טבלת המשתמשים
+  const AIRTABLE_TOKEN = "patF4C4qkhZYMyqx0.40394af51871fbd152b8fa6a22f8d9a8409cb3f229188093fa6018068c62327c";
+  const AIRTABLE_BASE_ID = "appJPXRCmu3C4pIUF";
+  const USERS_TABLE_NAME = "משתמשים"; // טבלת המשתמשים
+  const LOGIN_LOGS_TABLE_NAME = "לוג כניסה"; // טבלת הלוגים
+
+  // פונקציה להבאת נתוני המשתמשים מ-Airtable
+  async function fetchCredentials() {
+    try {
+      const response = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(USERS_TABLE_NAME)}`, {
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      // מחזירים מערך של אובייקטים עם שם משתמש וסיסמא מהשדות "שם משתמש" ו-"סיסמא"
+      return data.records.map(record => ({
+        id: record.id,
+        username: record.fields["שם משתמש"],
+        password: record.fields["סיסמא"]
+      }));
+    } catch (error) {
+      console.error("שגיאה בטעינת נתוני המשתמשים מ-Airtable:", error);
+      return [];
+    }
+  }
+
+  // פונקציה לרישום לוג כניסה לטבלת "לוג כניסה"
+  async function logLoginAttempt(username, status, userFound = null) {
+    // בונים את המטען (payload) עבור יצירת הרשומה
+    const payload = {
+      fields: {
+        "סטטוס כניסה": status
+      }
+    };
+
+    // במידה והמשתמש נמצא, נרשום את הקישור (כמערך עם ה-ID) לשדה "משתמש"
+    if (userFound) {
+      payload.fields["משתמש"] = [ userFound.id ];
+    } else {
+      // אם המשתמש לא נמצא, נשמור את הערך שהוזן בשדה "משתמש ניסיון"
+      payload.fields["משתמש ניסיון"] = username;
+    }
+
+    try {
+      const response = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(LOGIN_LOGS_TABLE_NAME)}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${AIRTABLE_TOKEN}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        throw new Error("לא ניתן לשמור לוג התחברות");
+      }
+      console.log("לוג התחברות נרשם בהצלחה");
+    } catch (error) {
+      console.error("שגיאה בשמירת לוג התחברות:", error);
+    }
+  }
+
+  // טיפול בהתחברות
+  async function handleLogin(event) {
+    event.preventDefault();
+    const usernameInput = document.getElementById("username").value.trim();
+    const passwordInput = document.getElementById("password").value.trim();
+    const errorMessageDiv = document.getElementById("errorMessage");
+    errorMessageDiv.innerText = "";
+
+    // טוען את נתוני המשתמשים
+    const credentials = await fetchCredentials();
+
+    // בודק אם המשתמש קיים והסיסמא תואמת
+    const user = credentials.find(user => user.username === usernameInput && user.password === passwordInput);
+
+    if (user) {
+      console.log("כניסה מוצלחת למשתמש:", user.username);
+      // רישום לוג כניסה מוצלחת
+      logLoginAttempt(usernameInput, "כניסה הצליחה", user);
+      // הפניה לדף הראשי של המערכת (בחירת שיטת השליחה והמסמך)
+      window.location.href = "https://y130160.github.io/form/form.html";
+    } else {
+      // רישום לוג כניסה נכשלה
+      logLoginAttempt(usernameInput, "כניסה נכשלה");
+      errorMessageDiv.innerText = "שם משתמש או סיסמא שגויים.";
+    }
+  }
+
+  document.getElementById("loginForm").addEventListener("submit", handleLogin);
+</script>
+</body>
+</html>
