@@ -158,6 +158,8 @@
       console.log("כניסה מוצלחת למשתמש:", user.username);
       // רישום לוג כניסה מוצלחת
       logLoginAttempt(usernameInput, "כניסה הצליחה", user);
+      localStorage.setItem("loggedIn", "true");
+
       // הפניה לדף הראשי של המערכת (בחירת שיטת השליחה והמסמך)
       window.location.href = "https://y130160.github.io/form/form.html";
     } else {
