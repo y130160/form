@@ -424,10 +424,9 @@
         // לאחר הצלחה, מעבר לדף האישור
         // נכין QueryString (פרמטרים) לדף האישור
         const destination = sendMethod === "פקס" ? finalFax : finalEmail;
-        const confirmationUrl = `confirmation.html?destination=${encodeURIComponent(destination)}&documentType=${encodeURIComponent(documentType)}`;
-
+        const confirmationUrl = `https://y130160.github.io/form/תשובה.html?destination=${encodeURIComponent(destination)}&documentType=${encodeURIComponent(documentType)}`;
         // מעבר לדף האישור
-       window.location.href = "https://y130160.github.io/form/תשובה.html?destination";
+       window.location.href = confirmationUrl;
 
       } catch (error) {
         console.error("שגיאה בשליחה לווב-הוק:", error);
