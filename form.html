@@ -290,39 +290,6 @@ async function fetchStudents() {
     }
 }
 
-// הצגת התלמידים בחלון Modal
-async function showStudentModal() {
-    if (!document.getElementById("studentModal")) {
-        createModal();
-    }
-
-    const studentListDiv = document.getElementById("studentList");
-    studentListDiv.innerHTML = "טוען תלמידים...";
-    
-    const students = await fetchStudents();
-    studentListDiv.innerHTML = "";
-
-    students.forEach(name => {
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.value = name;
-        checkbox.addEventListener("change", function () {
-            if (this.checked) {
-                selectedStudents.push(this.value);
-            } else {
-                selectedStudents = selectedStudents.filter(student => student !== this.value);
-            }
-        });
-
-        const label = document.createElement("label");
-        label.textContent = name;
-        label.style.display = "block";
-        label.style.marginBottom = "5px";
-        label.style.cursor = "pointer";
-        label.prepend(checkbox);
-        studentListDiv.appendChild(label);
-    });
-}
 
 // בחירה של כל התלמידים בלחיצה אחת
 function selectAllStudents() {
