@@ -13,7 +13,6 @@
       padding-top: 50px;
       direction: rtl;
     }
-
     .container {
       width: 90%;
       max-width: 400px;
@@ -23,7 +22,6 @@
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-
     img.logo {
       width: 100px;
       margin-bottom: 15px;
@@ -31,7 +29,6 @@
       margin-left: auto;
       margin-right: auto;
     }
-
     h2 {
       margin-bottom: 20px;
     }
@@ -45,19 +42,23 @@
 </div>
 
 <script>
-  function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
-  }
-
   document.addEventListener("DOMContentLoaded", function() {
-    const destination = getQueryParam("destination");
-    const documentType = getQueryParam("documentType");
-    
+    // פונקציה לקבלת ערכים מתוך ה-Query String
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    // נקרא את הפרמטרים
+    const destination = getQueryParam("dest"); // כתובת מייל או מספר פקס
+    const documentType = getQueryParam("doc"); // סוג המסמך
+
+    // נרכיב את ההודעה בהתאם
     if (destination && documentType) {
-      document.getElementById("confirmationMessage").innerText = `בעוד כמה דקות ישלח ל${destination} ${documentType} שביקשתם`;
+      document.getElementById("confirmationMessage").innerText =
+        `בדקות הקרובות נשלח ל${destination} את המסמך ${documentType}`;
     } else {
-      document.getElementById("confirmationMessage").innerText = "שגיאה: מידע חסר";
+      document.getElementById("confirmationMessage").innerText = "שגיאה: חסרים פרמטרים בכתובת הדף.";
     }
   });
 </script>
