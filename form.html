@@ -124,9 +124,11 @@
 </div>
 
 <script>
-  document.getElementById("sendMethod").addEventListener("change", function() {
-    document.getElementById("faxOptions").style.display = this.value === "פקס" ? "block" : "none";
-    document.getElementById("emailOptions").style.display = this.value === "מייל" ? "block" : "none";
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("sendMethod").addEventListener("change", function() {
+        document.getElementById("faxOptions").style.display = this.value === "פקס" ? "block" : "none";
+        document.getElementById("emailOptions").style.display = this.value === "מייל" ? "block" : "none";
+    });
 });
 
 document.getElementById("faxNumber").addEventListener("change", function() {
