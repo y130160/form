@@ -124,52 +124,25 @@
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("sendMethod").addEventListener("change", function() {
         document.getElementById("faxOptions").style.display = this.value === "פקס" ? "block" : "none";
         document.getElementById("emailOptions").style.display = this.value === "מייל" ? "block" : "none";
     });
-});
 
-document.getElementById("faxNumber").addEventListener("change", function() {
-    document.getElementById("customFax").style.display = this.value === "אחר" ? "block" : "none";
-    document.getElementById("documentSection").style.display = "block";
-});
-
-document.getElementById("emailAddress").addEventListener("change", function() {
-    document.getElementById("customEmail").style.display = this.value === "אחר" ? "block" : "none";
-    document.getElementById("documentSection").style.display = "block";
-});
-
-document.getElementById("documentType").addEventListener("change", function() {
-    document.querySelector("button[type=submit]").style.display = "block";
-});
-
-document.getElementById("userForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    const sendMethod = document.getElementById("sendMethod").value;
-    let destination = sendMethod === "פקס" ? document.getElementById("faxNumber").value : document.getElementById("emailAddress").value;
-    if (destination === "אחר") {
-        destination = sendMethod === "פקס" ? document.getElementById("customFax").value : document.getElementById("customEmail").value;
-    }
-    const documentType = document.getElementById("documentType").value;
-
-    const answers = {
-        sendMethod,
-        destination,
-        documentType
-    };
-
-    await fetch("https://hook.eu2.make.com/n97tifs14z8a5bkiu96z1buh7g1u9lsg", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(answers)
+    document.getElementById("faxNumber").addEventListener("change", function() {
+        document.getElementById("customFax").style.display = this.value === "אחר" ? "block" : "none";
+        document.getElementById("documentSection").style.display = "block";
     });
 
-    window.location.href = https://y130160.github.io/form/תשובה.html?destination=${encodeURIComponent(destination)}&documentType=${encodeURIComponent(documentType)};
+    document.getElementById("emailAddress").addEventListener("change", function() {
+        document.getElementById("customEmail").style.display = this.value === "אחר" ? "block" : "none";
+        document.getElementById("documentSection").style.display = "block";
+    });
+
+    document.getElementById("documentType").addEventListener("change", function() {
+        document.querySelector("button[type=submit]").style.display = "block";
+    });
 });
 
 const AIRTABLE_TOKEN = "patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749";
@@ -177,35 +150,56 @@ const AIRTABLE_BASE_ID = "appanZGbMogA0mxRl";
 const AIRTABLE_TABLE_NAME = "רשימת אברכים";
 const AIRTABLE_FIELD_NAME = "משפחה ופרטי";
 
-document.addEventListener("DOMContentLoaded", function () {
-    const documentTypeField = document.getElementById("documentType");
-    if (documentTypeField) {
-        documentTypeField.addEventListener("change", function() {
-            if (this.value === "דפי שימור" || this.value === "דו"ח חודשי") {
-                const questionDiv = document.createElement("div");
-                questionDiv.id = "chooseStudentsDiv";
-                questionDiv.innerHTML = `
-                    <label>בחר האם לשלוח לכל התלמידים או לבחור תלמידים מסוימים:</label>
-                    <select id="chooseStudents">
-                        <option value="all">כל התלמידים</option>
-                        <option value="some">בחר תלמידים</option>
-                    </select>
-                `;
-                this.parentNode.appendChild(questionDiv);
-                
-                document.getElementById("chooseStudents").addEventListener("change", function() {
-                    if (this.value === "some") {
-                        showStudentModal();
-                    }
-                });
+async function fetchStudents() {
+    try {
+        const response = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?sort[0][field]=${AIRTABLE_FIELD_NAME}`, {
+            headers: {
+                Authorization: `Bearer ${AIRTABLE_TOKEN}`
             }
         });
-    } else {
-        console.error("⚠️ שגיאה: לא נמצא אלמנט עם id='documentType'. ודא שהוא קיים ב-HTML.");
-    }
-});
 
-// יצירת ה-Modal לבחירת תלמידים עם עיצוב משופר
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.records.map(record => record.fields[AIRTABLE_FIELD_NAME]);
+
+    } catch (error) {
+        console.error("Error fetching students:", error);
+        return [];
+    }
+}
+
+async function showStudentModal() {
+    if (!document.getElementById("studentModal")) {
+        createModal();
+    }
+    document.getElementById("studentList").innerHTML = "טוען תלמידים...";
+    const students = await fetchStudents();
+    const studentListDiv = document.getElementById("studentList");
+    studentListDiv.innerHTML = "";
+    students.forEach(name => {
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = name;
+        checkbox.addEventListener("change", function () {
+            if (this.checked) {
+                selectedStudents.push(this.value);
+            } else {
+                selectedStudents = selectedStudents.filter(student => student !== this.value);
+            }
+        });
+        const label = document.createElement("label");
+        label.textContent = name;
+        label.style.display = "block";
+        label.style.marginBottom = "5px";
+        label.style.cursor = "pointer";
+        label.prepend(checkbox);
+        studentListDiv.appendChild(label);
+    });
+}
+
 function createModal() {
     const modal = document.createElement("div");
     modal.id = "studentModal";
@@ -239,59 +233,6 @@ function createModal() {
 
 let selectedStudents = [];
 
-// טעינת התלמידים מאיירטייבל
-async function fetchStudents() {
-    try {
-        const response = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?sort[0][field]=${AIRTABLE_FIELD_NAME}`, {
-            headers: {
-                Authorization: `Bearer ${AIRTABLE_TOKEN}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.records.map(record => record.fields[AIRTABLE_FIELD_NAME]);
-
-    } catch (error) {
-        console.error("Error fetching students:", error);
-        return [];
-    }
-}
-
-// הצגת התלמידים ב-Modal
-async function showStudentModal() {
-    if (!document.getElementById("studentModal")) {
-        createModal();
-    }
-    document.getElementById("studentList").innerHTML = "טוען תלמידים...";
-    const students = await fetchStudents();
-    const studentListDiv = document.getElementById("studentList");
-    studentListDiv.innerHTML = "";
-    students.forEach(name => {
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.value = name;
-        checkbox.addEventListener("change", function () {
-            if (this.checked) {
-                selectedStudents.push(this.value);
-            } else {
-                selectedStudents = selectedStudents.filter(student => student !== this.value);
-            }
-        });
-        const label = document.createElement("label");
-        label.textContent = name;
-        label.style.display = "block";
-        label.style.marginBottom = "5px";
-        label.style.cursor = "pointer";
-        label.prepend(checkbox);
-        studentListDiv.appendChild(label);
-    });
-}
-
-// פונקציה לבחירת כל התלמידים
 function selectAllStudents() {
     document.querySelectorAll("#studentList input[type='checkbox']").forEach(checkbox => {
         checkbox.checked = true;
@@ -301,7 +242,6 @@ function selectAllStudents() {
     });
 }
 
-// אישור הבחירה
 function confirmStudentSelection() {
     document.getElementById("studentModal").remove();
     console.log("תלמידים שנבחרו:", selectedStudents);
