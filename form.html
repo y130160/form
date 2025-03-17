@@ -144,22 +144,26 @@
     modal.style.textAlign = "right";
     modal.style.border = "1px solid #ccc";
 
-    // הפיכת המודאל לתצוגת Flex בעמודה
-    modal.style.display = "flex";
-    modal.style.flexDirection = "column";
-    // גובה מקסימלי כדי שניתן יהיה לגלול רק את רשימת השמות
+    // הפיכת המודאל לרשת (Grid) עם שלוש שורות:
+    // 1) כותרת, 2) רשימת תלמידים (גלילה), 3) כפתורי פעולה
+    modal.style.display = "grid";
+    modal.style.gridTemplateRows = "auto 1fr auto";
+    // מגבילים גובה מקסימלי כדי שהרשימה תגלול במקום שהכפתורים ייעלמו
     modal.style.maxHeight = "80vh";
+    modal.style.overflow = "hidden";
 
     // התוכן הפנימי של המודאל
     modal.innerHTML = `
-      <!-- כותרת עליונה עם כפתור סגירה -->
+      <!-- כותרת עליונה עם כפתור סגירה (שורה 1) -->
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
         <h3 style="margin: 0; font-size: 16px; font-weight: normal; color: #333;">בחר תלמידים</h3>
         <button id="closeModal" style="background: none; border: none; font-size: 20px; cursor: pointer;">✖</button>
       </div>
 
-      <!-- אזור הגלילה עם רשימת התלמידים -->
-      <div id="studentList" style="flex: 1; overflow-y: auto; margin-top: 10px;"></xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxית המודאל -->
+      <!-- אזור הגלילה עם רשימת התלמידים (שורה 2) -->
+      <div id="studentList" style="overflow-y: auto; margin-top: 10px;"></div>
+
+      <!-- כפתורים בתחתית המודאל (שורה 3) -->
       <div style="display: flex; justify-content: space-between; margin-top: 15px;">
         <button id="selectAll" style="padding: 10px; background-color: #b8860b; color: white; border: none; cursor: pointer; border-radius: 5px; font-size: 14px;">בחר הכול</button>
         <button id="confirmSelection" style="padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 5px; font-size: 14px;">אישור</button>
