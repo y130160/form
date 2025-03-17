@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>הזמנת מסמכים כולל מזומנים ב"ב</title>
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    if (!localStorage.getItem("loggedIn")) {
+      window.location.href = "https://y130160.github.io/form/login.html";
+    }
+  });
+</script>
   <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="https://y130160.github.io/form/לוגו בני ברק.png">
   <style>
