@@ -13,7 +13,6 @@
       padding-top: 20px;
       direction: rtl;
     }
-
     .container {
       width: 90%;
       max-width: 400px;
@@ -24,7 +23,6 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       text-align: right;
     }
-
     img.logo {
       width: 100px;
       margin-bottom: 15px;
@@ -32,11 +30,9 @@
       margin-left: auto;
       margin-right: auto;
     }
-
     h2 {
       text-align: center;
     }
-
     input, select, button {
       width: 100%;
       padding: 10px;
@@ -47,13 +43,11 @@
       font-size: 16px;
       text-align: right;
     }
-
     label {
       display: block;
       font-weight: bold;
       text-align: right;
     }
-
     button {
       background-color: #b8860b;
       color: white;
@@ -65,26 +59,22 @@
       display: none;
       margin: 0 auto;
     }
-
     button:hover {
       background-color: #a07608;
     }
   </style>
 </head>
 <body>
-
 <div class="container">
   <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו המוסד">
   <h2>הזמנת מסמכים כולל מזומנים ב"ב</h2>
   <form id="userForm">
-
     <label>לשלוח לפקס/מייל</label>
     <select id="sendMethod">
       <option value="" selected disabled>בחר אפשרות</option>
       <option value="מייל">מייל</option>
       <option value="פקס">פקס</option>
     </select>
-
     <div id="faxOptions" style="display: none;">
       <label>מספר הפקס אליו ישלחו המסמכים</label>
       <select id="faxNumber">
@@ -95,7 +85,6 @@
       </select>
       <input type="text" id="customFax" placeholder="הכנס מספר פקס" style="display: none;">
     </div>
-
     <div id="emailOptions" style="display: none;">
       <label>לאיזה מייל לשלוח את המסמכים?</label>
       <select id="emailAddress">
@@ -107,7 +96,6 @@
       </select>
       <input type="email" id="customEmail" placeholder="הכנס כתובת מייל" style="display: none;">
     </div>
-
     <div id="documentSection" style="display: none;">
       <label>איזה מסמך ברצונך להנפיק?</label>
       <select id="documentType">
@@ -118,197 +106,202 @@
         <option value="דוח חודשי">דו"ח חודשי</option>
       </select>
     </div>
-
     <button type="submit">שלח פרטים</button>
   </form>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("sendMethod").addEventListener("change", function() {
-        document.getElementById("faxOptions").style.display = this.value === "פקס" ? "block" : "none";
-        document.getElementById("emailOptions").style.display = this.value === "מייל" ? "block" : "none";
-    });
+  // הגדרות חיבור ל-Airtable
+  const AIRTABLE_TOKEN = "patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749";
+  const AIRTABLE_BASE_ID = "appanZGbMogA0mxRl";
+  const AIRTABLE_TABLE_NAME = "רשימת אברכים";
+  const AIRTABLE_FIELD_NAME = "משפחה ופרטי";
+  let selectedStudents = []; // משתנה לשמירת התלמידים שנבחרו
 
-    document.getElementById("faxNumber").addEventListener("change", function() {
-        document.getElementById("customFax").style.display = this.value === "אחר" ? "block" : "none";
-        document.getElementById("documentSection").style.display = "block";
-    });
+ function createModal() {
+  const modal = document.createElement("div");
+  modal.id = "studentModal";
 
-    document.getElementById("emailAddress").addEventListener("change", function() {
-        document.getElementById("customEmail").style.display = this.value === "אחר" ? "block" : "none";
-        document.getElementById("documentSection").style.display = "block";
-    });
+  // הגדרות בסיסיות של המודאל
+  modal.style.position = "fixed";
+  modal.style.top = "50%";
+  modal.style.left = "50%";
+  modal.style.transform = "translate(-50%, -50%)";
+  modal.style.backgroundColor = "#fff";
+  modal.style.padding = "20px";
+  modal.style.borderRadius = "12px";
+  modal.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
+  modal.style.zIndex = "1000";
+  modal.style.width = "400px";
+  modal.style.textAlign = "right";
+  modal.style.border = "1px solid #ccc";
 
-    document.getElementById("documentType").addEventListener("change", function() {
-        document.querySelector("button[type=submit]").style.display = "block";
-    });
-});
+  // הפיכת המודאל לתצוגת Flex בעמודה, כדי לשלוט טוב יותר בחלוקת המרחב
+  modal.style.display = "flex";
+  modal.style.flexDirection = "column";
+  // מגבילים גובה מקסימלי כך שהכפתור בתחתית תמיד יופיע, והחלק האמצעי יהיה ניתן לגלילה
+  modal.style.maxHeight = "80vh";
 
-document.addEventListener("DOMContentLoaded", function () {
-    // האזנה לבחירה במסמכים והצגת שאלת הבחירה
-    const documentTypeField = document.getElementById("documentType");
-    documentTypeField.addEventListener("change", function() {
-        if (this.value === "דפי שימור" || this.value === "דוח חודשי") {
-            let questionDiv = document.getElementById("chooseStudentsDiv");
-            if (!questionDiv) {
-                questionDiv = document.createElement("div");
-                questionDiv.id = "chooseStudentsDiv";
-                questionDiv.innerHTML = `
-                    <label>בחר האם לשלוח לכל התלמידים או לבחור תלמידים מסוימים:</label>
-                    <select id="chooseStudents">
-                        <option value="all">כל התלמידים</option>
-                        <option value="some">בחר תלמידים</option>
-                    </select>
-                `;
-                this.parentNode.appendChild(questionDiv);
-            }
-            
-            document.getElementById("chooseStudents").addEventListener("change", function() {
-                if (this.value === "some") {
-                    showStudentModal();
-                }
-            });
-        }
-    });
-});
+  // התוכן הפנימי של המודאל
+  modal.innerHTML = `
+    <!-- כותרת עליונה עם כפתור סגירה -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+      <h3 style="margin: 0; font-size: 16px; font-weight: normal; color: #333;">בחר תלמידים</h3>
+      <button id="closeModal" style="background: none; border: none; font-size: 20px; cursor: pointer;">✖</button>
+    </div>
 
-// הגדרות חיבור ל-Airtable
-const AIRTABLE_TOKEN = "patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749";
-const AIRTABLE_BASE_ID = "appanZGbMogA0mxRl";
-const AIRTABLE_TABLE_NAME = "רשימת אברכים";
-const AIRTABLE_FIELD_NAME = "משפחה ופרטי";
+    <!-- אזור הגלילה עם רשימת התלמידים -->
+    <div id="studentList" style="flex: 1; overflow-y: auto; margin-top: 10px;"></div>
 
-// יצירת Modal לבחירת תלמידים עם עיצוב משופר
-// יצירת Modal לבחירת תלמידים עם עיצוב מתוקן
-function createModal() {
-    const modal = document.createElement("div");
-    modal.id = "studentModal";
-    modal.style.position = "fixed";
-    modal.style.top = "50%";
-    modal.style.left = "50%";
-    modal.style.transform = "translate(-50%, -50%)";
-    modal.style.backgroundColor = "#fff";
-    modal.style.padding = "20px";
-    modal.style.borderRadius = "12px";
-    modal.style.boxShadow = "0 4px 12px rgba(0,0,0,0.3)";
-    modal.style.zIndex = "1000";
-    modal.style.width = "400px";
-    modal.style.textAlign = "right";
-    modal.style.maxHeight = "500px";
-    modal.style.overflow = "hidden";
-    modal.style.border = "1px solid #ccc";
+    <!-- כפתורים בתחתית המודאל (יישארו קבועים גם כשגוללים) -->
+    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+      <button id="selectAll" style="padding: 10px; background-color: #b8860b; color: white; border: none; cursor: pointer; border-radius: 5px; font-size: 14px;">בחר הכול</button>
+      <button id="confirmSelection" style="padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 5px; font-size: 14px;">אישור</button>
+    </div>
+  `;
 
-    modal.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
-            <h3 style="margin: 0; font-size: 16px; font-weight: normal; color: #333;">בחר תלמידים</h3>
-            <button id="closeModal" style="background: none; border: none; font-size: 20px; cursor: pointer;">✖</button>
-        </div>
-        <div id="studentList" style="max-height: 350px; overflow-y: auto; padding: 10px; border: 1px solid #ccc; border-radius: 5px; margin-top: 10px; background-color: #f9f9f9;"></div>
-        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
-            <button id="selectAll" style="padding: 10px; background-color: #b8860b; color: white; border: none; cursor: pointer; border-radius: 5px; font-size: 14px;">בחר הכול</button>
-            <button id="confirmSelection" style="padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 5px; font-size: 14px;">אישור</button>
-        </div>
-    `;
+  // מוסיפים את המודאל לגוף העמוד
+  document.body.appendChild(modal);
 
-    document.body.appendChild(modal);
-    
-    document.getElementById("selectAll").addEventListener("click", selectAllStudents);
-    document.getElementById("confirmSelection").addEventListener("click", confirmStudentSelection);
-    document.getElementById("closeModal").addEventListener("click", () => modal.remove());
+  // מאזינים לפעולות על הכפתורים
+  document.getElementById("selectAll").addEventListener("click", selectAllStudents);
+  document.getElementById("confirmSelection").addEventListener("click", confirmStudentSelection);
+  document.getElementById("closeModal").addEventListener("click", () => modal.remove());
 }
 
-// עיצוב וסידור רשימת התלמידים ב-Modal עם תיבת סימון בצד ימין
-async function showStudentModal() {
-    if (!document.getElementById("studentModal")) {
-        createModal();
-    }
 
+  // פונקציה להצגת המודאל וטעינת התלמידים
+  async function showStudentModal() {
+    if (!document.getElementById("studentModal")) {
+      createModal();
+    }
     const studentListDiv = document.getElementById("studentList");
     studentListDiv.innerHTML = "טוען תלמידים...";
-    
+
     const students = await fetchStudents();
     studentListDiv.innerHTML = "";
 
     students.forEach(name => {
-        const listItem = document.createElement("div");
-        listItem.style.display = "flex";
-        listItem.style.alignItems = "center";
-        listItem.style.justifyContent = "space-between";
-        listItem.style.padding = "8px";
-        listItem.style.borderBottom = "1px solid #ddd";
+      const listItem = document.createElement("div");
+      listItem.style.borderBottom = "1px solid #ddd";
+      listItem.style.padding = "8px";
 
-        const label = document.createElement("label");
-        label.textContent = name;
-        label.style.flex = "1";
-        label.style.cursor = "pointer";
-        label.style.marginRight = "10px";  // רווח בין התיבה לשם
-        
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.value = name;
-        checkbox.style.marginLeft = "10px"; // תיבת סימון מיושרת לצד ימין
+      // הגדרת התווית כ-flex בשורה אחת
+      const label = document.createElement("label");
+      label.style.display = "inline-flex";
+      label.style.flexDirection = "row-reverse"; // טקסט מימין, צ'קבוקס משמאל
+      label.style.alignItems = "center";
+      label.style.gap = "10px";
+      label.style.whiteSpace = "nowrap";
+      label.style.cursor = "pointer";
 
-        checkbox.addEventListener("change", function () {
-            if (this.checked) {
-                selectedStudents.push(this.value);
-            } else {
-                selectedStudents = selectedStudents.filter(student => student !== this.value);
-            }
-        });
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = name;
 
-        listItem.appendChild(checkbox);
-        listItem.appendChild(label);
-        studentListDiv.appendChild(listItem);
+      // הוספת מאזין לשינוי הבחירה
+      checkbox.addEventListener("change", function () {
+        if (this.checked) {
+          selectedStudents.push(this.value);
+        } else {
+          selectedStudents = selectedStudents.filter(student => student !== this.value);
+        }
+      });
+
+      // מוסיפים את שם התלמיד, ואז את תיבת הסימון (row-reverse יעשה שהטקסט מימין)
+      label.appendChild(document.createTextNode(name));
+      label.appendChild(checkbox);
+
+      listItem.appendChild(label);
+      studentListDiv.appendChild(listItem);
     });
-}
+  }
 
-
-
-// משתנה לשמירת התלמידים שנבחרו
-let selectedStudents = [];
-
-// טעינת רשימת התלמידים מאיירטייבל
-async function fetchStudents() {
+  // טעינת רשימת התלמידים מאיירטייבל
+  async function fetchStudents() {
     try {
-        const response = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?sort[0][field]=${AIRTABLE_FIELD_NAME}`, {
-            headers: {
-                Authorization: `Bearer ${AIRTABLE_TOKEN}`
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+      const response = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}?sort[0][field]=${AIRTABLE_FIELD_NAME}`, {
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`
         }
-
-        const data = await response.json();
-        return data.records.map(record => record.fields[AIRTABLE_FIELD_NAME]);
-
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data.records.map(record => record.fields[AIRTABLE_FIELD_NAME]);
     } catch (error) {
-        console.error("שגיאה בטעינת התלמידים מאיירטייבל:", error);
-        return [];
+      console.error("שגיאה בטעינת התלמידים מאיירטייבל:", error);
+      return [];
     }
-}
+  }
 
-
-// בחירה של כל התלמידים בלחיצה אחת
-function selectAllStudents() {
+  // בחירה של כל התלמידים
+  function selectAllStudents() {
     document.querySelectorAll("#studentList input[type='checkbox']").forEach(checkbox => {
-        checkbox.checked = true;
-        if (!selectedStudents.includes(checkbox.value)) {
-            selectedStudents.push(checkbox.value);
-        }
+      checkbox.checked = true;
+      if (!selectedStudents.includes(checkbox.value)) {
+        selectedStudents.push(checkbox.value);
+      }
     });
-}
+  }
 
-// אישור הבחירה ושליחת הנתונים
-function confirmStudentSelection() {
+  // אישור הבחירה וסגירת המודאל
+  function confirmStudentSelection() {
     document.getElementById("studentModal").remove();
     console.log("תלמידים שנבחרו:", selectedStudents);
-}
+  }
 
+  // האזנה לאירועים בעת טעינת הדף
+  document.addEventListener("DOMContentLoaded", function () {
+    // טיפול בבחירת שיטת השליחה
+    document.getElementById("sendMethod").addEventListener("change", function() {
+      document.getElementById("faxOptions").style.display = (this.value === "פקס") ? "block" : "none";
+      document.getElementById("emailOptions").style.display = (this.value === "מייל") ? "block" : "none";
+    });
+
+    // טיפול בבחירת מספר הפקס
+    document.getElementById("faxNumber").addEventListener("change", function() {
+      document.getElementById("customFax").style.display = (this.value === "אחר") ? "block" : "none";
+      document.getElementById("documentSection").style.display = "block";
+    });
+
+    // טיפול בבחירת כתובת המייל
+    document.getElementById("emailAddress").addEventListener("change", function() {
+      document.getElementById("customEmail").style.display = (this.value === "אחר") ? "block" : "none";
+      document.getElementById("documentSection").style.display = "block";
+    });
+
+    // טיפול בבחירת סוג המסמך
+    document.getElementById("documentType").addEventListener("change", function() {
+      // מציג כפתור שליחה ברגע שבוחרים מסמך
+      document.querySelector("button[type=submit]").style.display = "block";
+
+      // אם נבחרו מסמכים שמצריכים בחירת תלמידים
+      if (this.value === "דפי שימור" || this.value === "דוח חודשי") {
+        let questionDiv = document.getElementById("chooseStudentsDiv");
+        if (!questionDiv) {
+          questionDiv = document.createElement("div");
+          questionDiv.id = "chooseStudentsDiv";
+          questionDiv.innerHTML = `
+            <label>בחר האם לשלוח לכל התלמידים או לבחור תלמידים מסוימים:</label>
+            <select id="chooseStudents">
+              <option value="all">כל התלמידים</option>
+              <option value="some">בחר תלמידים</option>
+            </select>
+          `;
+          this.parentNode.appendChild(questionDiv);
+
+          // אם המשתמש בוחר לבחור תלמידים - נפתח חלון הבחירה
+          document.getElementById("chooseStudents").addEventListener("change", function() {
+            if (this.value === "some") {
+              showStudentModal();
+            }
+          });
+        }
+      }
+    });
+  });
 </script>
-
-
 </body>
 </html>
