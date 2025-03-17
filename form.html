@@ -180,6 +180,7 @@ const AIRTABLE_TABLE_NAME = "רשימת אברכים";
 const AIRTABLE_FIELD_NAME = "משפחה ופרטי";
 
 // יצירת Modal לבחירת תלמידים עם עיצוב משופר
+// יצירת Modal לבחירת תלמידים עם עיצוב מתוקן
 function createModal() {
     const modal = document.createElement("div");
     modal.id = "studentModal";
@@ -236,11 +237,17 @@ async function showStudentModal() {
         listItem.style.justifyContent = "space-between";
         listItem.style.padding = "8px";
         listItem.style.borderBottom = "1px solid #ddd";
+
+        const label = document.createElement("label");
+        label.textContent = name;
+        label.style.flex = "1";
+        label.style.cursor = "pointer";
+        label.style.marginRight = "10px";  // רווח בין התיבה לשם
         
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.value = name;
-        checkbox.style.marginRight = "10px";
+        checkbox.style.marginLeft = "10px"; // תיבת סימון מיושרת לצד ימין
 
         checkbox.addEventListener("change", function () {
             if (this.checked) {
@@ -250,16 +257,12 @@ async function showStudentModal() {
             }
         });
 
-        const label = document.createElement("label");
-        label.textContent = name;
-        label.style.flex = "1";
-        label.style.cursor = "pointer";
-
-        listItem.appendChild(label);
         listItem.appendChild(checkbox);
+        listItem.appendChild(label);
         studentListDiv.appendChild(listItem);
     });
 }
+
 
 
 // משתנה לשמירת התלמידים שנבחרו
