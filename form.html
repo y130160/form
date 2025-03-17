@@ -196,6 +196,7 @@ function createModal() {
     modal.style.overflow = "hidden";
     
     modal.innerHTML = `
+        <button id="closeModal" style="position: absolute; top: 5px; left: 5px; background: none; border: none; font-size: 20px; cursor: pointer;">✖</button>
         <h3 style="margin-bottom: 10px;">בחר תלמידים</h3>
         <div id="studentList" style="max-height: 250px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin-bottom: 10px;"></div>
         <button id="selectAll" style="margin-bottom: 10px; padding: 8px 12px; background-color: #b8860b; color: white; border: none; cursor: pointer; border-radius: 5px;">בחר הכול</button>
@@ -205,6 +206,7 @@ function createModal() {
     document.body.appendChild(modal);
     document.getElementById("selectAll").addEventListener("click", () => selectAllStudents());
     document.getElementById("confirmSelection").addEventListener("click", () => confirmStudentSelection());
+    document.getElementById("closeModal").addEventListener("click", () => modal.remove());
 }
 
 let selectedStudents = [];
@@ -288,6 +290,7 @@ documentTypeField.addEventListener("change", function() {
         });
     }
 });
+
 
 </script>
 
