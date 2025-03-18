@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>הזמנת מסמכים כולל מזומנים ב"ב</title>
+  <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://y130160.github.io/form/לוגו בני ברק.png">
+  <style>
+    body {
+      font-family: 'Times New Roman', serif;
+      background-color: #f8f9fa;
+      text-align: center;
+      padding-top: 20px;
+      direction: rtl;
+    }
+    .container {
+      width: 90%;
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: right;
+    }
+    img.logo {
+      width: 100px;
+      margin-bottom: 15px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h2 {
+      text-align: center;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 16px;
+      text-align: right;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      text-align: right;
+    }
+    button {
+      background-color: #b8860b;
+      color: white;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      border-radius: 12px;
+      text-align: center;
+      margin: 0 auto;
+    }
+    button:hover {
+      background-color: #a07608;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו המוסד">
+  <h2>הזמנת מסמכים כולל מזומנים ב"ב</h2>
+
+  <!-- טופס ראשי -->
+  <form id="userForm">
+    <label>לשלוח לפקס/מייל</label>
+    <select id="sendMethod">
+      <option value="" selected disabled>בחר אפשרות</option>
+      <option value="מייל">מייל</option>
+      <option value="פקס">פקס</option>
+    </select>
+
+    <div id="faxOptions" style="display: none;">
+      <label>מספר הפקס אליו ישלחו המסמכים</label>
+      <select id="faxNumber">
+        <option value="" selected disabled>בחר פקס</option>
+        <option value="035711778">כולל מזומנים</option>
+        <option value="038078810">ראה"כ</option>
+        <option value="אחר">אחר</option>
+      </select>
+      <input type="text" id="customFax" placeholder="הכנס מספר פקס" style="display: none;">
+    </div>
+
+    <div id="emailOptions" style="display: none;">
+      <label>לאיזה מייל לשלוח את המסמכים?</label>
+      <select id="emailAddress">
+        <option value="" selected disabled>בחר מייל</option>
+        <option value="m035711778@gmail.com">כולל מזומנים</option>
+        <option value="t038078810@gmail.com">ראה"כ</option>
+        <option value="32218gk@gmail.com">מזכ"ל</option>
+        <option value="אחר">אחר</option>
+      </select>
+      <input type="email" id="customEmail" placeholder="הכנס כתובת מייל" style="display: none;">
+    </div>
+
+    <div id="documentSection" style="display: none;">
+      <label>איזה מסמך ברצונך להנפיק?</label>
+      <select id="documentType">
+        <option value="" selected disabled>בחר מסמך</option>
+        <option value="רשימת אברכי הכולל">רשימת אברכי הכולל</option>
+        <option value="מסכתות משבצות">מסכתות משבצות</option>
+        <option value="דפי שימור">דפי שימור</option>
+        <option value="דוח חודשי">דוח חודשי</option>
+      </select>
+    </div>
+
+    <!-- כפתור השליחה, שיופיע/יעודכן בהתאם לסוג המסמך -->
+    <button type="submit" style="display: none;">שלח פרטים</button>
+  </form>
+</div>
+
+<script>
+  // ------------------- הגדרות חיבור ל-Airtable -------------------
+  const AIRTABLE_TOKEN = "patF4C4qkhZYMyqx0.40394af51871fbd152b8fa6a22f8d9a8409cb3f229188093fa6018068c62327c";
+  const AIRTABLE_BASE_ID = "appanZGbMogA0mxRl";
+  const AIRTABLE_TABLE_NAME = "רשימת אברכים";
+  const AIRTABLE_FIELD_NAME = "משפחה ופרטי";
+
+  // מערך לשמירת התלמידים שנבחרו (ה-IDs)
+  let selectedStudents = [];
+
+  //------------------------------------------------
+  // 1) createModal() - יצירת מודאל לבחירת תלמידים
+  //------------------------------------------------
+  function createModal() {
+    const modal = document.createElement("div");
+    modal.id = "studentModal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      backgroundColor: "#fff",
+      padding: "20px",
+      borderRadius: "12px",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+      zIndex: "1000",
+      width: "400px",
+      textAlign: "right",
+      border: "1px solid #ccc",
+      display: "flex",
+      flexDirection: "column",
+      maxHeight: "80vh",
+      overflow: "auto"
+    });
+
+    modal.innerHTML = `
+      <div style="position: relative; width: 100%; border-bottom: 1px solid #ddd; padding: 15px 0; text-align: center; direction: ltr;">
+        <button id="closeModal" style="width: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: black; position: absolute; left: 0px; top: 50%; transform: translateY(-50%);">✖</button>
+        <h3 style="margin: 0; font-size: 24px; font-weight: bold; color: #333;">בחר תלמידים</h3>
+      </div>
+      <div id="studentList" style="overflow-y: auto; margin-top: 10px; flex: 1 1 auto;"></div>
+      <div style="display: flex; justify-content: center; margin-top: 15px;">
+        <button id="confirmSelection" style="padding: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 5px; font-size: 14px;">אישור</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById("confirmSelection").addEventListener("click", confirmStudentSelection);
+    document.getElementById("closeModal").addEventListener("click", () => modal.remove());
+  }
+
+  //------------------------------------------------
+  // 2) showStudentModal() - הצגת מודאל בחירת תלמידים
+  //------------------------------------------------
+  async function showStudentModal() {
+    if (!document.getElementById("studentModal")) {
+      createModal();
+    }
+    const studentListDiv = document.getElementById("studentList");
+    studentListDiv.innerHTML = "טוען תלמידים...";
+    const students = await fetchStudents();
+    studentListDiv.innerHTML = "";
+    students.forEach(student => {
+      const listItem = document.createElement("div");
+      listItem.style.borderBottom = "1px solid #ddd";
+      listItem.style.padding = "8px";
+      const label = document.createElement("label");
+      Object.assign(label.style, {
+        display: "inline-flex",
+        flexDirection: "row-reverse",
+        alignItems: "center",
+        gap: "10px",
+        whiteSpace: "nowrap",
+        cursor: "pointer"
+      });
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.value = student.id;
+      checkbox.addEventListener("change", function () {
+        if (this.checked) {
+          selectedStudents.push(this.value);
+        } else {
+          selectedStudents = selectedStudents.filter(id => id !== this.value);
+        }
+      });
+      label.appendChild(document.createTextNode(student.name));
+      label.appendChild(checkbox);
+      listItem.appendChild(label);
+      studentListDiv.appendChild(listItem);
+    });
+  }
+
+  //------------------------------------------------
+  // 3) fetchStudents() - טעינת נתונים מ-Airtable
+  //------------------------------------------------
+  async function fetchStudents() {
+    try {
+      const response = await fetch(`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE_NAME)}?sort[0][field]=${AIRTABLE_FIELD_NAME}`, {
+        headers: {
+          Authorization: `Bearer ${AIRTABLE_TOKEN}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data.records.map(record => ({
+        id: record.id,
+        name: record.fields[AIRTABLE_FIELD_NAME]
+      }));
+    } catch (error) {
+      console.error("שגיאה בטעינת התלמידים מ-Airtable:", error);
+      return [];
+    }
+  }
+
+  //------------------------------------------------
+  // 4) confirmStudentSelection() - אישור בחירת תלמידים
+  //------------------------------------------------
+  function confirmStudentSelection() {
+    document.getElementById("studentModal").remove();
+    console.log("תלמידים נבחרו (ID):", selectedStudents);
+  }
+
+  //------------------------------------------------
+  // אירועים בעת טעינת הדף
+  //------------------------------------------------
+  document.addEventListener("DOMContentLoaded", function () {
+
+    // שינוי הצגת אופציות למשלוח לפקס/מייל
+     document.getElementById("sendMethod").addEventListener("change", function() {
+      document.getElementById("faxOptions").style.display = (this.value === "פקס") ? "block" : "none";
+      document.getElementById("emailOptions").style.display = (this.value === "מייל") ? "block" : "none";
+    });
+    
+
+     // טיפול בבחירת פקס
+    document.getElementById("faxNumber").addEventListener("change", function() {
+      document.getElementById("customFax").style.display = (this.value === "אחר") ? "block" : "none";
+      document.getElementById("documentSection").style.display = "block";
+    });
+
+     // טיפול בבחירת מייל
+    document.getElementById("emailAddress").addEventListener("change", function() {
+      document.getElementById("customEmail").style.display = (this.value === "אחר") ? "block" : "none";
+      document.getElementById("documentSection").style.display = "block";
+    });
+
+    // ----------------- שינוי: טיפול בבחירת סוג מסמך -----------------
+    document.getElementById("documentType").addEventListener("change", function() {
+      const submitButton = document.querySelector("button[type=submit]");
+      // אם נבחר "דפי שימור"
+      if (this.value === "דפי שימור") {
+        // הסרת כל אלמנט קיים לבחירת תלמידים
+        let questionDiv = document.getElementById("chooseStudentsDiv");
+        if (!questionDiv) {
+          questionDiv = document.createElement("div");
+          questionDiv.id = "chooseStudentsDiv";
+          questionDiv.innerHTML = `
+            <label>בחר האם לשלוח לכל התלמידים או לבחור תלמידים מסוימים:</label>
+            <select id="chooseStudents">
+              <option value="">בחר אפשרות</option>
+              <option value="all">כל התלמידים</option>
+              <option value="some">בחר תלמידים</option>
+            </select>
+          `;
+          this.parentNode.appendChild(questionDiv);
+          
+          // הסתרת כפתור השליחה עד לבחירה
+          submitButton.style.display = "none";
+          
+          document.getElementById("chooseStudents").addEventListener("change", function() {
+            if (this.value) {
+              // במידה ונבחר "some", מפעילים את המודאל
+              if (this.value === "some") {
+                showStudentModal();
+              } else {
+                selectedStudents = [];
+              }
+              submitButton.style.display = "block"; // מציגים את הכפתור רק לאחר בחירה
+            } else {
+              submitButton.style.display = "none";
+            }
+          });
+        }
+      }
+      // אם נבחר "דוח חודשי"
+      else if (this.value === "דוח חודשי") {
+        // מסירים כל אלמנט לבחירת תלמידים במידה וקיים
+        let questionDiv = document.getElementById("chooseStudentsDiv");
+        if (questionDiv) {
+          questionDiv.remove();
+        }
+        // משנה את טקסט הכפתור ל-"לחץ להכנת הדו"ח" ומציג אותו
+        submitButton.style.display = "block";
+        submitButton.innerText = "לחץ להכנת הדו"ח";
+      }
+      // עבור סוגי מסמכים אחרים
+      else {
+        // מסירים את אלמנט בחירת התלמידים במידה וקיים
+        let questionDiv = document.getElementById("chooseStudentsDiv");
+        if (questionDiv) {
+          questionDiv.remove();
+        }
+        submitButton.style.display = "block";
+        submitButton.innerText = "שלח פרטים";
+      }
+    });
+    // ----------------- סוף שינוי -----------------
+
+    // ----------------- טיפול בהגנה על הדף (בדיקת התחברות) -----------------
+    // ----------------- סוף טיפול -----------------
+
+    // טיפול באירוע השליחה של הטופס
+    document.getElementById("userForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const sendMethod = document.getElementById("sendMethod").value;
+      let finalFax = "";
+      let finalEmail = "";
+
+      if (sendMethod === "פקס") {
+        const faxVal = document.getElementById("faxNumber").value;
+        finalFax = (faxVal === "אחר") 
+          ? document.getElementById("customFax").value 
+          : faxVal;
+      } else if (sendMethod === "מייל") {
+        const emailVal = document.getElementById("emailAddress").value;
+        finalEmail = (emailVal === "אחר") 
+          ? document.getElementById("customEmail").value 
+          : emailVal;
+      }
+
+      const documentType = document.getElementById("documentType").value;
+
+      // ----------------- שינוי: טיפול שונה ל"דוח חודשי" -----------------
+      if (documentType === "דוח חודשי") {
+        // כאן ניתן להוסיף לוגיקה נוספת אם יש צורך
+        // הפניה לדף להכנת הדו"ח (נניח report.html)
+        window.location.href = "https://y130160.github.io/form/report.html";
+        return;
+      }
+      // ----------------- סוף שינוי -----------------
+
+      // אוספים את הנתונים לשליחה
+      const dataToSend = {
+        sendMethod,
+        faxNumber: finalFax,
+        emailAddress: finalEmail,
+        documentType,
+        selectedStudents
+      };
+
+      try {
+        const response = await fetch("https://hook.eu2.make.com/n97tifs14z8a5bkiu96z1buh7g1u9lsg", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dataToSend)
+        });
+        if (!response.ok) throw new Error("Network response was not ok");
+
+        // מעבר לדף אישור עם הפרמטרים
+        const destination = sendMethod === "פקס" ? finalFax : finalEmail;
+        const confirmationUrl = `confirmation.html?destination=${encodeURIComponent(destination)}&documentType=${encodeURIComponent(documentType)}`;
+        window.location.href = confirmationUrl;
+      } catch (error) {
+        console.error("שגיאה בשליחה לווב-הוק:", error);
+        alert("אירעה שגיאה בשליחת הנתונים");
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
