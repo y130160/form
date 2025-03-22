@@ -262,6 +262,7 @@
   document.addEventListener("DOMContentLoaded", function () {
     // מאזין לשדה בחירת כתובת המייל: הצגת שדה למייל מותאם במידה והנבחר "אחר" והצגת אזור בחירת מסמך
     document.getElementById("emailAddress").addEventListener("change", function() {
+      console.log("מייל נבחר:", this.value);
       document.getElementById("customEmail").style.display = (this.value === "אחר") ? "block" : "none";
       document.getElementById("documentSection").style.display = "block";
     });
