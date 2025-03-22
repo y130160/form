@@ -103,16 +103,12 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+  // בדיקת התחברות
+  document.addEventListener("DOMContentLoaded", function() {
     if (!localStorage.getItem("loggedIn")) {
       window.location.href = "https://y130160.github.io/form/כניסה למערכת.html";
     }
   });
-  // ------------------- הגדרות חיבור ל-Airtable -------------------
-  const AIRTABLE_TOKEN = "patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749";
-  const AIRTABLE_BASE_ID = "appanZGbMogA0mxRl";
-  const AIRTABLE_TABLE_NAME = "רשימת אברכים";
-  const AIRTABLE_FIELD_NAME = "משפחה ופרטי";
 
   // מערך לשמירת התלמידים שנבחרו (יכיל את ה-ID שלהם)
   let selectedStudents = [];
@@ -206,23 +202,18 @@
     });
   }
 
-  // טעינת התלמידים מ-Airtable
+  // טעינת התלמידים משרתנו המקומי – הקוד מצפה ששרת Node.js יחזיר את הנתונים מ-Airtable
   async function fetchStudents() {
     try {
-      const response = await fetch(
-        "https://api.airtable.com/v0/" + AIRTABLE_BASE_ID + "/" + AIRTABLE_TABLE_NAME + 
-        "?sort[0][field]=" + encodeURIComponent(AIRTABLE_FIELD_NAME),
-        {
-          headers: { Authorization: "Bearer " + AIRTABLE_TOKEN }
-        }
-      );
+      const response = await fetch("/api/students");
       if (!response.ok) {
         throw new Error("HTTP error! Status: " + response.status);
       }
       const data = await response.json();
+      // המרת הנתונים לפי השדה "משפחה ופרטי"
       return data.records.map(record => ({
         id: record.id,
-        name: record.fields[AIRTABLE_FIELD_NAME] || ""
+        name: record.fields["משפחה ופרטי"] || ""
       }));
     } catch (error) {
       console.error("Error fetching students:", error);
@@ -230,7 +221,7 @@
     }
   }
 
-  // אישור בחירת תלמידים
+  // אישור בחירת תלמידים – פשוט מסיר את המודאל
   function confirmStudentSelection() {
     const modal = document.getElementById("studentModal");
     if (modal) {
