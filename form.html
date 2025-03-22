@@ -125,10 +125,13 @@
     }
   });
   // ------------------- הגדרות חיבור ל-Airtable -------------------
-  const AIRTABLE_TOKEN = "patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749";
-  const AIRTABLE_BASE_ID = "appanZGbMogA0mxRl";
-  const AIRTABLE_TABLE_NAME = "רשימת אברכים";
-  const AIRTABLE_FIELD_NAME = "משפחה ופרטי";
+require('dotenv').config(); // טוען את המשתנים מהקובץ .env
+
+const AIRTABLE_TOKEN = process.env.AIRTABLE_TOKEN;
+const AIRTABLE_BASE_ID = process.env.AIRTABLE_BASE_ID;
+const AIRTABLE_TABLE_NAME = process.env.AIRTABLE_TABLE_NAME;
+const AIRTABLE_FIELD_NAME = process.env.AIRTABLE_FIELD_NAME;
+
 
   // מערך לשמירת התלמידים שנבחרו (כעת מאוחסנים ה-ID)
   let selectedStudents = [];
