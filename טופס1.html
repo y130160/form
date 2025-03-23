@@ -103,11 +103,6 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-    if (!localStorage.getItem("loggedIn")) {
-      window.location.href = "https://y130160.github.io/form/כניסה למערכת.html";
-    }
-  });
   // ------------------- הגדרות חיבור ל-Airtable -------------------
   const AIRTABLE_TOKEN = "patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749";
   const AIRTABLE_BASE_ID = "appanZGbMogA0mxRl";
@@ -140,7 +135,7 @@
       overflow: "auto"
     });
 
-    modal.innerHTML = 
+    modal.innerHTML = `
       <div style="position: relative; width: 100%; border-bottom: 1px solid #ddd; padding: 15px 0; text-align: center; direction: ltr;">
         <button id="closeModal" style="width: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: black; position: absolute; left: 0px; top: 50%; transform: translateY(-50%);">
           ✖
@@ -153,7 +148,7 @@
           אישור
         </button>
       </div>
-    ;
+    `;
 
     document.body.appendChild(modal);
 
@@ -271,13 +266,13 @@
         // יוצרים שאלה חדשה לבחירת "כל התלמידים" או "בחר תלמידים"
         questionDiv = document.createElement("div");
         questionDiv.id = "chooseStudentsDiv";
-        questionDiv.innerHTML = 
+        questionDiv.innerHTML = `
           <label>בחר האם לשלוח לכל התלמידים או לבחור תלמידים מסוימים:</label>
           <select id="chooseStudents">
             <option value="all">כל התלמידים</option>
             <option value="some">בחר תלמידים</option>
           </select>
-        ;
+        `;
         docSelect.parentNode.appendChild(questionDiv);
 
         document.getElementById("chooseStudents").addEventListener("change", function() {
@@ -312,7 +307,7 @@
         });
         reportButton.addEventListener("click", function() {
           // מפנה לדף placeholder
-          window.location.href = "https://y130160.github.io/form/עובדים.html";
+          window.location.href = "https://y130160.github.io/form/report.html";
         });
         docSelect.parentNode.appendChild(reportButton);
 
