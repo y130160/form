@@ -21,41 +21,47 @@
       margin: 60px auto 100px auto;
       background-color: #fff;
       padding: 20px;
-      padding-top: 60px; /* קצת רווח מעל לתוכן בתוך הקונטיינר */
-      padding-bottom: 120px; /* רווח גדול יותר בתחתית עבור כפתור השמירה */
+      padding-top: 60px;
+      padding-bottom: 120px;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     img.logo {
       width: 100px;
-      margin-bottom: 5px;
+      margin-bottom: 10px;
     }
-    /* כותרת, מוצבת מתחת ללוגו עם רווח קטן */
     h2 {
       margin-top: 10px;
       margin-bottom: 20px;
     }
-    /* כותרת "בחר תלמיד" – הגדלת גודל הפונט ויצירת רווח מתחת */
     label[for="studentSelect"] {
       font-size: 1.3em;
       font-weight: bold;
-      display: block; 
-      margin-bottom: 8px; /* רווח מתחת לכותרת */
+      display: block;
+      margin-bottom: 8px;
     }
-    /* עיצוב לתפריט הבחירה */
     #studentSelect {
       width: 100%;
       max-width: 300px;
-      margin-bottom: 20px; /* רווח אחרי התפריט */
+      margin-bottom: 20px;
       padding: 5px;
-      height: 40px; 
+      height: 40px;
       background-color: #f0f0f0;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 1em;
       box-sizing: border-box;
     }
-    /* כפתור "עדכן מסכתות ופרקים" בצד שמאל למעלה בתוך הקונטיינר */
+    /* עיצוב כללי לכפתורים (לא כולל מחיקה) */
+    button {
+      font-size: 1.1em;
+      padding: 12px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: bold;
+    }
     #updateBtn {
       position: absolute;
       top: 20px;
@@ -63,31 +69,23 @@
       background-color: #b8860b;
       color: #fff;
       border: 2px solid #fff;
-      border-radius: 50px;
-      padding: 10px 15px;
-      font-weight: bold;
-      cursor: pointer;
       z-index: 1000;
     }
-    /* מעטפת לכפתורי נווט (תלמיד קודם / הבא) בצד ימין למעלה */
     .nav-buttons {
       position: absolute;
       top: 20px;
       right: 20px;
       display: flex;
-      gap: 10px; /* רווח בין הכפתורים */
+      gap: 10px;
       z-index: 1000;
+      position: sticky;
     }
     .nav-buttons button {
       background-color: #b8860b;
       color: #fff;
       border: 2px solid #fff;
-      border-radius: 50px;
-      padding: 10px 15px;
-      font-weight: bold;
-      cursor: pointer;
+      
     }
-    /* כפתור "שמירה" במרכז בתחתית בתוך הקונטיינר */
     #saveAllBtn {
       position: absolute;
       bottom: 20px;
@@ -97,12 +95,18 @@
       background-color: #b8860b;
       color: #fff;
       border: 2px solid #fff;
+    }
+    /* כפתור מחיקה – הקטן יותר */
+    .deleteBtn {
+      background-color: #dc3545;
+      color: #fff;
+      border: 2px solid #fff;
+      font-size: 0.9em;
+      padding: 5px 10px;
       border-radius: 50px;
-      padding: 10px 15px;
-      font-weight: bold;
       cursor: pointer;
     }
-    /* עיצוב לטבלה */
+    /* עיצוב לטבלה – הפחתת רווח בין התאים */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -113,7 +117,7 @@
       color: #fff;
     }
     th, td {
-      padding: 10px;
+      padding: 3px; /* הפחתת padding ל-3px */
       border: 1px solid #ddd;
       text-align: center;
       white-space: normal;
@@ -129,7 +133,7 @@
     .editable {
       width: 100%;
       min-height: 30px;
-      padding: 5px;
+      padding: 3px;  /* הפחתת padding */
       box-sizing: border-box;
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -139,48 +143,30 @@
     }
     select {
       width: 100%;
-      padding: 5px;
+      padding: 3px;  /* הפחתת padding */
       box-sizing: border-box;
-    }
-    button {
-      padding: 10px 15px;
-      margin: 5px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .deleteBtn {
-      background-color: #dc3545;
-      color: #fff;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- כפתור עדכן מסכתות ופרקים -->
     <button id="updateBtn">עדכן מסכתות ופרקים</button>
-    
-    <!-- מעטפת לכפתורי נווט (תלמיד קודם / הבא) בצד ימין למעלה -->
     <div class="nav-buttons">
       <button id="prevBtn">תלמיד קודם</button>
       <button id="nextBtn">תלמיד הבא</button>
     </div>
-    
     <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו">
     <h2>נתוני תלמיד - הכנה לדוח</h2>
-    
     <label for="studentSelect">בחר תלמיד:</label>
     <select id="studentSelect">
       <option value="">בחר תלמיד</option>
     </select>
-    
     <div id="reportDataContainer"></div>
-    
     <button id="saveAllBtn" class="saveBtn" style="display:none;">שמירה</button>
   </div>
   
   <script>
-    // פרטי חיבור קבועים לאיירטייבל – עדכן לפי הפרטים שלך
+    // פרטי חיבור לאיירטייבל – עדכן לפי הפרטים שלך
     const AIRTABLE_API_KEY = 'patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749';
     const AIRTABLE_BASE_ID = 'appanZGbMogA0mxRl';
     const STUDENTS_TABLE = 'רשימת אברכים';
@@ -191,7 +177,7 @@
     const סוגOptions = ['שערי יצחק', 'תורתו'];
     const עדכוןOptions = ['אין שינוי ✅', 'נא לעדכן ❌', 'חדש'];
     
-    // Headers לבקשות לאיירטייבל
+    // Headers לבקשות
     const headers = {
       'Authorization': 'Bearer ' + AIRTABLE_API_KEY,
       'Content-Type': 'application/json'
@@ -272,7 +258,7 @@
         cell1.appendChild(editable1);
         tr.appendChild(cell1);
         
-        // סוג - single select (dropdown)
+        // סוג - dropdown
         const cell2 = document.createElement('td');
         const select2 = document.createElement('select');
         const defaultOption2 = document.createElement('option');
@@ -299,7 +285,7 @@
         cell3.appendChild(editable3);
         tr.appendChild(cell3);
         
-        // עידכון - single select (dropdown)
+        // עידכון - dropdown
         const cell4 = document.createElement('td');
         const select4 = document.createElement('select');
         const defaultOption4 = document.createElement('option');
@@ -326,7 +312,7 @@
         cell5.appendChild(editable5);
         tr.appendChild(cell5);
         
-        // פעולות - כפתור מחיקה
+        // פעולות - כפתור מחיקה קטן יותר
         const cellActions = document.createElement('td');
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'מחק';
@@ -397,7 +383,6 @@
       }
     }
     
-    // אירוע שינוי תלמיד
     document.getElementById('studentSelect').addEventListener('change', async function() {
       const studentId = this.value;
       if(!studentId) return;
@@ -405,12 +390,10 @@
       renderReportTable(records);
     });
     
-    // כפתור שמירה
     document.getElementById('saveAllBtn').addEventListener('click', async function() {
       await updateRecords();
     });
     
-    // כפתור עדכן מסכתות ופרקים
     document.getElementById('updateBtn').addEventListener('click', function() {
       const studentSelect = document.getElementById('studentSelect');
       const studentId = studentSelect.value;
@@ -418,15 +401,14 @@
         alert('אנא בחר תלמיד תחילה.');
         return;
       }
-      window.location.href = `https://hook.eu2.make.com/sok3rjsuhkvgv8k213muudc7123nlwoe?studentId=${encodeURIComponent(studentId)}`;
+      window.location.href = `https://your-webhook-url.com/?studentId=${encodeURIComponent(studentId)}`;
     });
     
-    // ניווט בין תלמידים: תלמיד קודם ותלמיד הבא
     document.getElementById('prevBtn').addEventListener('click', function() {
       const select = document.getElementById('studentSelect');
       const options = Array.from(select.options);
       const currentIndex = options.findIndex(option => option.selected);
-      if(currentIndex > 1) { // index 0 הוא "בחר תלמיד"
+      if(currentIndex > 1) {
         select.selectedIndex = currentIndex - 1;
         select.dispatchEvent(new Event('change'));
       } else {
@@ -446,7 +428,6 @@
       }
     });
     
-    // אתחול
     populateStudentDropdown();
   </script>
 </body>
