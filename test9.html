@@ -1,279 +1,453 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>דף עדכון דוח</title>
+  <meta charset="UTF-8">
+  <title>דף נתונים - הכנה לדוח</title>
+  <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://y130160.github.io/form/לוגו בני ברק.png">
   <style>
-    /* איפוס סגנונות בסיסי */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     body {
       font-family: 'Times New Roman', serif;
-      background-color: #f5f5f5;
+      background-color: #f8f9fa;
+      text-align: center;
       direction: rtl;
+      margin: 0;
+      padding: 0;
     }
     .container {
-      max-width: 800px;
-      margin: 20px auto;
-      text-align: center;
-    }
-    .logo {
-      margin-bottom: 20px;
-    }
-    select {
-      padding: 10px;
-      font-size: 16px;
-    }
-    /* עיצוב חלונית פופאפ */
-    .modal {
-      display: none; 
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-    .modal-content {
-      background-color: #fff;
-      margin: 5% auto;
-      padding: 20px;
+      position: relative;
       width: 90%;
       max-width: 800px;
-      max-height: 80%;
-      overflow-y: auto;
-      position: relative;
+      margin: 60px auto 100px auto;
+      background-color: #fff;
+      padding: 20px;
+      padding-top: 60px; /* קצת רווח מעל לתוכן בתוך הקונטיינר */
+      padding-bottom: 120px; /* רווח גדול יותר בתחתית עבור כפתור השמירה */
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .close {
+    img.logo {
+      width: 100px;
+      margin-bottom: 5px;
+    }
+    /* כותרת, מוצבת מתחת ללוגו עם רווח קטן */
+    h2 {
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    /* כותרת "בחר תלמיד" – הגדלת גודל הפונט ויצירת רווח מתחת */
+    label[for="studentSelect"] {
+      font-size: 1.3em;
+      font-weight: bold;
+      display: block; 
+      margin-bottom: 8px; /* רווח מתחת לכותרת */
+    }
+    /* עיצוב לתפריט הבחירה */
+    #studentSelect {
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: 20px; /* רווח אחרי התפריט */
+      padding: 5px;
+      height: 40px; 
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    /* כפתור "עדכן מסכתות ופרקים" בצד שמאל למעלה בתוך הקונטיינר */
+    #updateBtn {
       position: absolute;
-      top: 10px;
+      top: 20px;
+      left: 20px;
+      background-color: #b8860b;
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 50px;
+      padding: 10px 15px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    /* מעטפת לכפתורי נווט (תלמיד קודם / הבא) בצד ימין למעלה */
+    .nav-buttons {
+      position: absolute;
+      top: 20px;
       right: 20px;
-      font-size: 24px;
+      display: flex;
+      gap: 10px; /* רווח בין הכפתורים */
+      z-index: 1000;
+    }
+    .nav-buttons button {
+      background-color: #b8860b;
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 50px;
+      padding: 10px 15px;
       font-weight: bold;
       cursor: pointer;
     }
+    /* כפתור "שמירה" במרכז בתחתית בתוך הקונטיינר */
+    #saveAllBtn {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      background-color: #b8860b;
+      color: #fff;
+      border: 2px solid #fff;
+      border-radius: 50px;
+      padding: 10px 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    /* עיצוב לטבלה */
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
+    thead {
+      background-color: #007bff;
+      color: #fff;
+    }
     th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
+      padding: 10px;
+      border: 1px solid #ddd;
       text-align: center;
+      white-space: normal;
+      word-wrap: break-word;
+      overflow: visible;
     }
-    th {
-      background-color: #eee;
+    tbody tr:nth-child(odd) {
+      background-color: #f2f2f2;
     }
-    input[type="text"] {
+    tbody tr:hover {
+      background-color: #e9ecef;
+    }
+    .editable {
       width: 100%;
-      box-sizing: border-box;
+      min-height: 30px;
       padding: 5px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      white-space: normal;
+      word-wrap: break-word;
+      overflow: visible;
+    }
+    select {
+      width: 100%;
+      padding: 5px;
+      box-sizing: border-box;
     }
     button {
-      padding: 5px 10px;
-      margin: 2px;
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
+    }
+    .deleteBtn {
+      background-color: #dc3545;
+      color: #fff;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו בני ברק" />
+    <!-- כפתור עדכן מסכתות ופרקים -->
+    <button id="updateBtn">עדכן מסכתות ופרקים</button>
+    
+    <!-- מעטפת לכפתורי נווט (תלמיד קודם / הבא) בצד ימין למעלה -->
+    <div class="nav-buttons">
+      <button id="prevBtn">תלמיד קודם</button>
+      <button id="nextBtn">תלמיד הבא</button>
+    </div>
+    
+    <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו">
+    <h2>נתוני תלמיד - הכנה לדוח</h2>
+    
     <label for="studentSelect">בחר תלמיד:</label>
     <select id="studentSelect">
-      <option value="">-- בחר תלמיד --</option>
+      <option value="">בחר תלמיד</option>
     </select>
+    
+    <div id="reportDataContainer"></div>
+    
+    <button id="saveAllBtn" class="saveBtn" style="display:none;">שמירה</button>
   </div>
-
-  <!-- חלונית פופאפ להצגת נתוני דוח -->
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <span id="closeModal" class="close">&times;</span>
-      <h2>נתוני דוח</h2>
-      <table id="reportTable">
-        <thead>
-          <tr>
-            <th>עידכון</th>
-            <th>מסכתות ופרקים</th>
-            <th>סוג</th>
-            <th>שותף</th>
-            <th>הערות</th>
-            <th>פעולות</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- שורות יתמלאו דינמית -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-
+  
   <script>
-    // נתוני האיירטייבל
-    const AIRTABLE_TOKEN = "patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749";
-    const AIRTABLE_BASE_ID = "appanZGbMogA0mxRl";
-    const STUDENTS_TABLE = "הכנה לדוח";
-
-    // טעינת רשימת התלמידים עם קריאת API
-    document.addEventListener("DOMContentLoaded", () => {
-      fetchStudents();
-      document.getElementById("studentSelect").addEventListener("change", handleStudentChange);
-      document.getElementById("closeModal").addEventListener("click", closeModal);
-    });
-
-    function fetchStudents() {
-      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(STUDENTS_TABLE)}`;
-      fetch(url, {
-        headers: {
-          "Authorization": "Bearer " + AIRTABLE_TOKEN
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        const select = document.getElementById("studentSelect");
-        data.records.forEach(record => {
-          const name = record.fields["משפחה ופרטי"];
-          if (name) {
-            const option = document.createElement("option");
-            option.value = record.id;
-            option.textContent = name;
-            select.appendChild(option);
-          }
-        });
-      })
-      .catch(error => {
-        alert("שגיאה בטעינת רשימת התלמידים: " + error);
-      });
-    }
-
-    function handleStudentChange() {
-      const studentId = this.value;
-      if (studentId) {
-        fetchReportData(studentId);
+    // פרטי חיבור קבועים לאיירטייבל – עדכן לפי הפרטים שלך
+    const AIRTABLE_API_KEY = 'patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749';
+    const AIRTABLE_BASE_ID = 'appanZGbMogA0mxRl';
+    const STUDENTS_TABLE = 'רשימת אברכים';
+    const REPORT_TABLE = 'הכנה לדוח';
+    const SORT_FIELD = 'משפחה ופרטי';
+    
+    // אפשרויות לשדות single select:
+    const סוגOptions = ['שערי יצחק', 'תורתו'];
+    const עדכוןOptions = ['אין שינוי ✅', 'נא לעדכן ❌', 'חדש'];
+    
+    // Headers לבקשות לאיירטייבל
+    const headers = {
+      'Authorization': 'Bearer ' + AIRTABLE_API_KEY,
+      'Content-Type': 'application/json'
+    };
+    
+    async function fetchStudents() {
+      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(STUDENTS_TABLE)}?sort[0][field]=${encodeURIComponent(SORT_FIELD)}`;
+      try {
+        const response = await fetch(url, { headers });
+        const data = await response.json();
+        return data.records;
+      } catch (error) {
+        console.error('Error fetching students:', error);
+        return [];
       }
     }
-
-    function fetchReportData(studentId) {
-      const filterFormula = encodeURIComponent(`SEARCH("${studentId}", ARRAYJOIN({תלמיד}))`);
-      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(REPORT_TABLE)}?filterByFormula=${filterFormula}`;
-      fetch(url, {
-        headers: {
-          "Authorization": "Bearer " + AIRTABLE_TOKEN
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        let records = data.records;
-        // מיון: קודם לפי "מסכתות ופרקים" (מהקטן לגדול), אחר כך לפי "סוג" (לפי סדר אלפביתי)
-        records.sort((a, b) => {
-          const m1 = parseInt(a.fields["מסכתות ופרקים"]) || 0;
-          const m2 = parseInt(b.fields["מסכתות ופרקים"]) || 0;
-          if (m1 !== m2) return m1 - m2;
-          const s1 = a.fields["סוג"] || "";
-          const s2 = b.fields["סוג"] || "";
-          return s1.localeCompare(s2);
-        });
-        populateReportTable(records);
-        openModal();
-      })
-      .catch(error => {
-        alert("שגיאה בטעינת נתוני הדוח: " + error);
+    
+    async function populateStudentDropdown() {
+      const select = document.getElementById('studentSelect');
+      const students = await fetchStudents();
+      students.forEach(record => {
+        const option = document.createElement('option');
+        option.value = record.id;
+        option.textContent = record.fields[SORT_FIELD] || 'ללא שם';
+        select.appendChild(option);
       });
     }
-
-    function populateReportTable(records) {
-      const tbody = document.getElementById("reportTable").querySelector("tbody");
-      tbody.innerHTML = "";
+    
+    async function fetchReportData(studentId) {
+      const formula = encodeURIComponent(`IF(FIND("${studentId}", ARRAYJOIN({IDתלמיד})), TRUE(), FALSE())`);
+      const sortParams = `&sort[0][field]=${encodeURIComponent("מס' מסכת")}&sort[0][direction]=asc&sort[1][field]=${encodeURIComponent("סוג")}&sort[1][direction]=asc`;
+      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(REPORT_TABLE)}?filterByFormula=${formula}${sortParams}`;
+      try {
+        const response = await fetch(url, { headers });
+        const data = await response.json();
+        console.log('Fetched report data:', data.records);
+        return data.records;
+      } catch (error) {
+        console.error('Error fetching report data:', error);
+        return [];
+      }
+    }
+    
+    function renderReportTable(records) {
+      const container = document.getElementById('reportDataContainer');
+      container.innerHTML = '';
+      if (records.length === 0) {
+        container.textContent = 'אין נתונים להצגה.';
+        document.getElementById('saveAllBtn').style.display = 'none';
+        return;
+      }
+      
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      const headersArray = ['מסכתות ופרקים', 'סוג', 'שותף', 'עידכון', 'הערות', 'פעולות'];
+      headersArray.forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+      
+      const tbody = document.createElement('tbody');
+      
       records.forEach(record => {
-        const tr = document.createElement("tr");
-        const fields = ["עידכון", "מסכתות ופרקים", "סוג", "שותף", "הערות"];
-        fields.forEach(field => {
-          const td = document.createElement("td");
-          const input = document.createElement("input");
-          input.type = "text";
-          input.value = record.fields[field] || "";
-          input.dataset.field = field;
-          td.appendChild(input);
-          tr.appendChild(td);
+        const tr = document.createElement('tr');
+        tr.dataset.recordId = record.id;
+        const fields = record.fields;
+        
+        // מסכתות ופרקים - div contenteditable
+        const cell1 = document.createElement('td');
+        const editable1 = document.createElement('div');
+        editable1.className = 'editable';
+        editable1.contentEditable = true;
+        editable1.textContent = fields['מסכתות ופרקים'] || '';
+        cell1.appendChild(editable1);
+        tr.appendChild(cell1);
+        
+        // סוג - single select (dropdown)
+        const cell2 = document.createElement('td');
+        const select2 = document.createElement('select');
+        const defaultOption2 = document.createElement('option');
+        defaultOption2.value = '';
+        defaultOption2.textContent = 'בחר סוג';
+        select2.appendChild(defaultOption2);
+        const currentType = fields['סוג'] || '';
+        סוגOptions.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          if(opt === currentType) option.selected = true;
+          select2.appendChild(option);
         });
-        const tdActions = document.createElement("td");
-        const saveBtn = document.createElement("button");
-        saveBtn.textContent = "עדכן";
-        saveBtn.addEventListener("click", () => updateRecord(record.id, tr));
-        tdActions.appendChild(saveBtn);
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "מחק";
-        deleteBtn.addEventListener("click", () => deleteRecord(record.id, tr));
-        tdActions.appendChild(deleteBtn);
-        tr.appendChild(tdActions);
+        cell2.appendChild(select2);
+        tr.appendChild(cell2);
+        
+        // שותף - div contenteditable
+        const cell3 = document.createElement('td');
+        const editable3 = document.createElement('div');
+        editable3.className = 'editable';
+        editable3.contentEditable = true;
+        editable3.textContent = fields['שותף'] || '';
+        cell3.appendChild(editable3);
+        tr.appendChild(cell3);
+        
+        // עידכון - single select (dropdown)
+        const cell4 = document.createElement('td');
+        const select4 = document.createElement('select');
+        const defaultOption4 = document.createElement('option');
+        defaultOption4.value = '';
+        defaultOption4.textContent = 'בחר עידכון';
+        select4.appendChild(defaultOption4);
+        const currentUpdate = fields['עידכון'] || '';
+        עדכוןOptions.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          if(opt === currentUpdate) option.selected = true;
+          select4.appendChild(option);
+        });
+        cell4.appendChild(select4);
+        tr.appendChild(cell4);
+        
+        // הערות - div contenteditable
+        const cell5 = document.createElement('td');
+        const editable5 = document.createElement('div');
+        editable5.className = 'editable';
+        editable5.contentEditable = true;
+        editable5.textContent = fields['הערות'] || '';
+        cell5.appendChild(editable5);
+        tr.appendChild(cell5);
+        
+        // פעולות - כפתור מחיקה
+        const cellActions = document.createElement('td');
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'מחק';
+        deleteBtn.className = 'deleteBtn';
+        deleteBtn.addEventListener('click', async () => {
+          if(confirm('האם אתה בטוח שברצונך למחוק רשומה זו?')) {
+            await deleteRecord(record.id);
+            tr.remove();
+          }
+        });
+        cellActions.appendChild(deleteBtn);
+        tr.appendChild(cellActions);
+        
         tbody.appendChild(tr);
       });
+      
+      table.appendChild(tbody);
+      container.appendChild(table);
+      document.getElementById('saveAllBtn').style.display = 'block';
     }
-
-    function updateRecord(recordId, tableRow) {
-      const inputs = tableRow.querySelectorAll("input");
-      let updatedFields = {};
-      inputs.forEach(input => {
-        updatedFields[input.dataset.field] = input.value;
+    
+    async function updateRecords() {
+      const tableRows = document.querySelectorAll('#reportDataContainer tbody tr');
+      if(tableRows.length === 0) return;
+      const recordsToUpdate = [];
+      tableRows.forEach(tr => {
+        const recordId = tr.dataset.recordId;
+        const cells = tr.querySelectorAll('td');
+        const updatedFields = {
+          'מסכתות ופרקים': cells[0].querySelector('.editable').textContent,
+          'סוג': cells[1].querySelector('select').value,
+          'שותף': cells[2].querySelector('.editable').textContent,
+          'עידכון': cells[3].querySelector('select').value,
+          'הערות': cells[4].querySelector('.editable').textContent
+        };
+        recordsToUpdate.push({ id: recordId, fields: updatedFields });
       });
+      
+      for(let i = 0; i < recordsToUpdate.length; i += 10) {
+        const batch = recordsToUpdate.slice(i, i + 10);
+        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(REPORT_TABLE)}`;
+        try {
+          const response = await fetch(url, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({ records: batch })
+          });
+          const data = await response.json();
+          console.log('Updated batch:', data);
+        } catch (error) {
+          console.error('Error updating records:', error);
+          alert('אירעה שגיאה בעדכון הרשומות.');
+          return;
+        }
+      }
+      alert('הרשומות עודכנו בהצלחה.');
+    }
+    
+    async function deleteRecord(recordId) {
       const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(REPORT_TABLE)}/${recordId}`;
-      fetch(url, {
-        method: "PATCH",
-        headers: {
-          "Authorization": "Bearer " + AIRTABLE_TOKEN,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ fields: updatedFields })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if(data.error) {
-          alert("שגיאה בעדכון: " + data.error.message);
-        } else {
-          alert("עודכן בהצלחה");
-        }
-      })
-      .catch(error => {
-        alert("שגיאה בעדכון: " + error);
-      });
+      try {
+        const response = await fetch(url, { method: 'DELETE', headers });
+        const data = await response.json();
+        console.log('Deleted record:', data);
+      } catch (error) {
+        console.error('Error deleting record:', error);
+        alert('אירעה שגיאה במחיקת הרשומה.');
+      }
     }
-
-    function deleteRecord(recordId, tableRow) {
-      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(REPORT_TABLE)}/${recordId}`;
-      fetch(url, {
-        method: "DELETE",
-        headers: {
-          "Authorization": "Bearer " + AIRTABLE_TOKEN
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        if(data.error) {
-          alert("שגיאה במחיקה: " + data.error.message);
-        } else {
-          tableRow.remove();
-          alert("נמחק בהצלחה");
-        }
-      })
-      .catch(error => {
-        alert("שגיאה במחיקה: " + error);
-      });
-    }
-
-    function openModal() {
-      document.getElementById("modal").style.display = "block";
-    }
-
-    function closeModal() {
-      document.getElementById("modal").style.display = "none";
-    }
+    
+    // אירוע שינוי תלמיד
+    document.getElementById('studentSelect').addEventListener('change', async function() {
+      const studentId = this.value;
+      if(!studentId) return;
+      const records = await fetchReportData(studentId);
+      renderReportTable(records);
+    });
+    
+    // כפתור שמירה
+    document.getElementById('saveAllBtn').addEventListener('click', async function() {
+      await updateRecords();
+    });
+    
+    // כפתור עדכן מסכתות ופרקים
+    document.getElementById('updateBtn').addEventListener('click', function() {
+      const studentSelect = document.getElementById('studentSelect');
+      const studentId = studentSelect.value;
+      if(!studentId) {
+        alert('אנא בחר תלמיד תחילה.');
+        return;
+      }
+      window.location.href = `https://hook.eu2.make.com/sok3rjsuhkvgv8k213muudc7123nlwoe?studentId=${encodeURIComponent(studentId)}`;
+    });
+    
+    // ניווט בין תלמידים: תלמיד קודם ותלמיד הבא
+    document.getElementById('prevBtn').addEventListener('click', function() {
+      const select = document.getElementById('studentSelect');
+      const options = Array.from(select.options);
+      const currentIndex = options.findIndex(option => option.selected);
+      if(currentIndex > 1) { // index 0 הוא "בחר תלמיד"
+        select.selectedIndex = currentIndex - 1;
+        select.dispatchEvent(new Event('change'));
+      } else {
+        alert('אין תלמיד קודם.');
+      }
+    });
+    
+    document.getElementById('nextBtn').addEventListener('click', function() {
+      const select = document.getElementById('studentSelect');
+      const options = Array.from(select.options);
+      const currentIndex = options.findIndex(option => option.selected);
+      if(currentIndex < options.length - 1) {
+        select.selectedIndex = currentIndex + 1;
+        select.dispatchEvent(new Event('change'));
+      } else {
+        alert('אין תלמיד הבא.');
+      }
+    });
+    
+    // אתחול
+    populateStudentDropdown();
   </script>
 </body>
 </html>
