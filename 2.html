@@ -51,7 +51,7 @@
     /* מעטפת עבור הכפתורים ותפריט הבחירה באותה שורה */
     .nav-row {
       display: flex;
-      justify-content: center; /* למקם באמצע */
+      justify-content: center;
       align-items: center;
       gap: 10px;
       margin-bottom: 20px;
@@ -83,7 +83,7 @@
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      width: 90%;
+      width: 50%;
       background-color: #b8860b;
       color: #fff;
       border: 2px solid #fff;
@@ -94,8 +94,8 @@
     }
     /* צמצום רוחב הטבלה והמרכזתה */
     .table-container {
-      max-width: 600px; /* מצמצם רוחב */
-      margin: 0 auto;   /* מרכזת אופקית */
+      max-width: 600px;
+      margin: 0 auto;
     }
     table {
       width: 100%;
@@ -141,23 +141,57 @@
       padding: 3px;
       box-sizing: border-box;
     }
-
-    /* סגנון לחלונית הפילטר (מיקום + עיצוב) */
+    /* חלונית הפילטר */
     #filterContainer {
-      display: none; 
-      position: absolute; 
-      top: 100px;   /* ניתן להתאים לפי הצורך */
-      left: 20px;   /* ניתן להתאים לפי הצורך */
+      display: none;
+      position: fixed;  /* יחסית לחלון הדפדפן */
+      top: 200px;
+      right: 20px;
       z-index: 9999;
     }
     #filterBox {
-      background: #fff; 
-      border: 1px solid #ccc; 
-      border-radius: 8px; 
-      padding: 10px; 
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
-      width: 180px;
-      text-align: right; 
+      background: linear-gradient(120deg, #fff3e0, #fff);
+      border: 2px solid #b8860b;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      width: 180px;  /* חלון קטן יותר */
+      text-align: right;
+      position: relative;
+      font-family: 'Times New Roman', serif;
+    }
+    /* כפתור X לסגירת החלונית */
+    #closeFilterBox {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #b8860b;
+      transition: transform 0.2s;
+    }
+    #closeFilterBox:hover {
+      transform: scale(1.1);
+    }
+    /* עיצוב כפתורי החל והנקה – ממורכזים בתוך מיכל */
+    .filter-buttons {
+      text-align: center;
+      margin-top: 10px;
+    }
+    #filterBox button {
+      background-color: #b8860b;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 4px;
+      font-size: 0.9em;
+    }
+    #filterBox button:hover {
+      background-color: #a6780a;
     }
   </style>
 </head>
@@ -168,17 +202,28 @@
     <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו">
     <h2>נתוני הכולל - הכנה לדוח</h2>
 
-    <!-- שורה אחת עם כפתור פילטר, כפתור "תלמיד קודם", select, כפתור "תלמיד הבא" -->
+    <!-- שורה אחת עם כפתור פילטר (תמונה), כפתור "תלמיד קודם", select, כפתור "תלמיד הבא" -->
     <div class="nav-row">
-      <!-- כפתור פילטר (אימוג׳י בלבד) -->
-      <button id="filterBtn" 
-              style="font-size: 1.5em; background: none; border: none; cursor: pointer;">
-        <img src="https://y130160.github.io/form/פילטר.PNG" alt="פילטר">
-      </button>
+      <button id="filterBtn" style="background:none; border:none; cursor:pointer;">
+        <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="30" 
+    height="30" 
+    viewBox="0 0 24 24"
+>
+  <!-- רקע שקוף -->
+  <rect width="24" height="24" fill="none" />
+  <!-- צורת פילטר/משפך -->
+  <path 
+    fill="#b8860b" 
+    d="M21 3H3v2l8 8v6l2 2v-8l8-8V3z"
+  />
+</svg>
 
+      </button>
       <button id="prevBtn">תלמיד קודם</button>
       <select id="studentSelect">
-        <option value="">בחר תלמיד</option>
+        <option value="" selected disabled>בחר תלמיד</option>
       </select>
       <button id="nextBtn">תלמיד הבא</button>
     </div>
@@ -186,18 +231,17 @@
     <!-- תפריט הפילטר (מוסתר כברירת מחדל) -->
     <div id="filterContainer">
       <div id="filterBox">
-        <h4 style="margin-top:0;">סינון</h4>
-
+        <span id="closeFilterBox">X</span>
+        <h4 style="text-align: center">סינון</h4>
         <label>שערי יצחק:</label>
-        <select id="filterShaarei" style="width:100%;">
+        <select id="filterShaarei">
           <option value="">(הצג הכל)</option>
           <option value="checked">מסומן ✔️</option>
           <option value="unchecked">לא מסומן ❌</option>
         </select>
-        <br><br>
-
+        <br>
         <label>תורתו:</label>
-        <select id="filterTorato" style="width:100%;">
+        <select id="filterTorato">
           <option value="">(הצג הכל)</option>
           <option value="הזמין">הזמין</option>
           <option value="בוצע">בוצע</option>
@@ -205,10 +249,10 @@
           <option value="לא עבר">לא עבר</option>
           <option value="לא בוצע">לא בוצע</option>
         </select>
-        <br><br>
-
-        <button id="applyFilterBtn">החל</button>
-        <button id="clearFilterBtn">נקה</button>
+        <div class="filter-buttons">
+          <button id="applyFilterBtn">החל</button>
+          <button id="clearFilterBtn">נקה</button>
+        </div>
       </div>
     </div>
 
@@ -232,7 +276,6 @@
     // אפשרויות לשדה "תורתו"
     const תורתוOptions = ["הזמין", "בוצע", "עבר", "לא עבר", "לא בוצע"];
     
-    // פונקציה שמביאה את כל הרשומות (ללא מגבלת 100)
     async function fetchAllRecords(tableName, queryParams="") {
       let allRecords = [];
       let offset = "";
@@ -255,7 +298,6 @@
       return allRecords;
     }
     
-    // מביא את רשימת התלמידים (למילוי ה-Select)
     async function fetchStudents() {
       const query = `sort[0][field]=משפחה ופרטי`; 
       return await fetchAllRecords(STUDENTS_TABLE, query);
@@ -266,16 +308,14 @@
       const students = await fetchStudents();
       students.forEach(record => {
         const option = document.createElement('option');
-        option.value = record.id; // ה-Record ID
+        option.value = record.id;
         option.textContent = record.fields["משפחה ופרטי"] || 'ללא שם';
         select.appendChild(option);
       });
     }
     
-    // מביא את רשומות "שערי יצחק" לפי IDתלמיד, וממיין לפי "מס' מסכת" ואז "מס' פרק"
     async function fetchReportData(studentId) {
       const formula = encodeURIComponent(`IF(FIND("${studentId}", ARRAYJOIN({IDתלמיד})), TRUE(), FALSE())`);
-      // מיון לפי "מס' מסכת" -> asc, ואז "מס' פרק" -> asc
       const sortParams = `sort[0][field]=${encodeURIComponent("מס' מסכת")}&sort[0][direction]=asc&sort[1][field]=${encodeURIComponent("מס' פרק")}&sort[1][direction]=asc`;
       const query = `filterByFormula=${formula}&${sortParams}`;
       const records = await fetchAllRecords(NEW_TABLE, query);
@@ -292,13 +332,11 @@
         return;
       }
       
-      // יצירת טבלה
       const table = document.createElement('table');
       const thead = document.createElement('thead');
       const headerRow = document.createElement('tr');
       
-      // כותרות העמודות
-      const headersArray = ['פרק 2', 'מדף', 'עד דף', 'מס\' דפים', 'שערי יצחק', 'תורתו'];
+      const headersArray = ['פרק', 'מדף', 'עד דף', 'מס\' דפים', 'שערי יצחק', 'תורתו'];
       headersArray.forEach(text => {
         const th = document.createElement('th');
         th.textContent = text;
@@ -308,85 +346,112 @@
       table.appendChild(thead);
       
       const tbody = document.createElement('tbody');
-      let currentGroup = ""; // הערך האחרון של "מסכת ומספר"
+      
+      const groups = [];
+      let currentGroupName = null;
+      let currentGroupObj = null;
       
       records.forEach(record => {
-        const fields = record.fields;
-        
-        // קיבוץ לפי "מסכת ומספר"
-        const groupValue = fields["מסכתות"] || "";
-        // בשורת הקבוצה נציג את השדה "מסכתות"
-        const groupDisplay = fields["מסכתות"] || "";
-        
-        // אם groupValue שונה מ-currentGroup => הוסף שורת קבוצה
-        if(groupValue !== currentGroup) {
-          currentGroup = groupValue;
-          const groupRow = document.createElement('tr');
-          const groupCell = document.createElement('td');
-          groupCell.colSpan = headersArray.length;
-          groupCell.textContent = groupDisplay;
-          groupCell.className = 'group-header';
-          groupRow.appendChild(groupCell);
-          tbody.appendChild(groupRow);
+        const groupValue = record.fields["מסכתות"] || "";
+        if (groupValue !== currentGroupName) {
+          currentGroupName = groupValue;
+          currentGroupObj = {
+            groupName: groupValue,
+            records: []
+          };
+          groups.push(currentGroupObj);
         }
+        currentGroupObj.records.push(record);
+      });
+      
+      groups.forEach(group => {
+        let sumChecked = 0;
+        let sumDone = 0;
         
-        // כעת יוצרים שורת נתונים
-        const tr = document.createElement('tr');
-        tr.dataset.recordId = record.id;
-        
-        // עמודה 0: פרק 2
-        const cell0 = document.createElement('td');
-        cell0.textContent = fields['פרק 2'] || '';
-        tr.appendChild(cell0);
-        
-        // עמודה 1: מדף
-        const cell1 = document.createElement('td');
-        cell1.textContent = fields['מדף'] || '';
-        tr.appendChild(cell1);
-        
-        // עמודה 2: עד דף
-        const cell2 = document.createElement('td');
-        cell2.textContent = fields['עד דף'] || '';
-        tr.appendChild(cell2);
-        
-        // עמודה 3: מס' דפים
-        const cell3 = document.createElement('td');
-        cell3.textContent = fields['מס\' דפים'] || '';
-        tr.appendChild(cell3);
-        
-        // עמודה 4: שערי יצחק (Checkbox)
-        const cell4 = document.createElement('td');
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.checked = fields['שערי יצחק'] || false;
-        cell4.appendChild(checkbox);
-        tr.appendChild(cell4);
-        
-        // עמודה 5: תורתו (Dropdown)
-        const cell5 = document.createElement('td');
-        const selectTorato = document.createElement('select');
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = 'בחר תורתו';
-        selectTorato.appendChild(defaultOption);
-        
-        תורתוOptions.forEach(opt => {
-          const option = document.createElement('option');
-          option.value = opt;
-          option.textContent = opt;
-          if(opt === fields['תורתו']) option.selected = true;
-          selectTorato.appendChild(option);
+        group.records.forEach(r => {
+          const fields = r.fields;
+          const pages = parseInt(fields["מס' דפים"] || 0, 10);
+          if (fields["שערי יצחק"]) {
+            sumChecked += pages;
+          }
+          if (fields["תורתו"] === "עבר") {
+            sumDone += pages;
+          }
         });
-        cell5.appendChild(selectTorato);
-        tr.appendChild(cell5);
         
-        tbody.appendChild(tr);
+        const groupRow = document.createElement('tr');
+        const groupNameCell = document.createElement('td');
+        groupNameCell.colSpan = 4;
+        groupNameCell.textContent = group.groupName;
+        groupNameCell.className = 'group-header';
+        groupRow.appendChild(groupNameCell);
+        
+        const sumCheckedCell = document.createElement('td');
+        sumCheckedCell.className = 'group-header';
+        sumCheckedCell.textContent = (sumChecked > 0) ? sumChecked : '';
+        groupRow.appendChild(sumCheckedCell);
+        
+        const sumDoneCell = document.createElement('td');
+        sumDoneCell.className = 'group-header';
+        sumDoneCell.textContent = (sumDone > 0) ? sumDone : '';
+        groupRow.appendChild(sumDoneCell);
+        
+        tbody.appendChild(groupRow);
+        
+        group.records.forEach(record => {
+          const fields = record.fields;
+          const tr = document.createElement('tr');
+          tr.dataset.recordId = record.id;
+          
+          const cell0 = document.createElement('td');
+          cell0.textContent = fields['פרק 2'] || '';
+          tr.appendChild(cell0);
+          
+          const cell1 = document.createElement('td');
+          cell1.textContent = fields['מדף'] || '';
+          tr.appendChild(cell1);
+          
+          const cell2 = document.createElement('td');
+          cell2.textContent = fields['עד דף'] || '';
+          tr.appendChild(cell2);
+          
+          const cell3 = document.createElement('td');
+          cell3.textContent = fields['מס\' דפים'] || '';
+          tr.appendChild(cell3);
+          
+          const cell4 = document.createElement('td');
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = fields['שערי יצחק'] || false;
+          cell4.appendChild(checkbox);
+          tr.appendChild(cell4);
+          
+          const cell5 = document.createElement('td');
+          const selectTorato = document.createElement('select');
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.textContent = 'בחר תורתו';
+          defaultOption.selected = true;
+          defaultOption.disabled = true;
+          selectTorato.appendChild(defaultOption);
+
+          תורתוOptions.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt;
+            option.textContent = opt;
+            if(opt === fields['תורתו']) option.selected = true;
+            selectTorato.appendChild(option);
+          });
+          cell5.appendChild(selectTorato);
+          tr.appendChild(cell5);
+          
+          tbody.appendChild(tr);
+        });
       });
       
       table.appendChild(tbody);
       container.appendChild(table);
       
-      // הצגת כפתור השמירה
       document.getElementById('saveAllBtn').style.display = 'block';
     }
     
@@ -396,21 +461,15 @@
       
       const recordsToUpdate = [];
       tableRows.forEach(tr => {
-        // דלג על שורות הקבוצה
-        if(tr.firstChild && tr.firstChild.hasAttribute("colspan")) return;
-        
-        const recordId = tr.dataset.recordId;
+        if(!tr.dataset.recordId) return;
         const cells = tr.querySelectorAll('td');
-        
-        // "שערי יצחק" בעמודה 4, "תורתו" בעמודה 5
         const updatedFields = {
           'שערי יצחק': cells[4].querySelector('input[type="checkbox"]').checked,
           'תורתו': cells[5].querySelector('select').value
         };
-        recordsToUpdate.push({ id: recordId, fields: updatedFields });
+        recordsToUpdate.push({ id: tr.dataset.recordId, fields: updatedFields });
       });
       
-      // עדכון בקבוצות של עד 10 רשומות (מגבלת Airtable)
       for(let i = 0; i < recordsToUpdate.length; i += 10) {
         const batch = recordsToUpdate.slice(i, i + 10);
         const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(NEW_TABLE)}`;
@@ -434,7 +493,6 @@
       alert('הרשומות עודכנו בהצלחה.');
     }
     
-    // ניווט לתלמיד הבא
     document.getElementById('nextBtn').addEventListener('click', function() {
       const select = document.getElementById('studentSelect');
       const options = Array.from(select.options);
@@ -447,7 +505,6 @@
       }
     });
     
-    // ניווט לתלמיד קודם
     document.getElementById('prevBtn').addEventListener('click', function() {
       const select = document.getElementById('studentSelect');
       const options = Array.from(select.options);
@@ -460,7 +517,6 @@
       }
     });
     
-    // בעת שינוי תלמיד ב-Select, הבאת רשומות והצגת הטבלה
     document.getElementById('studentSelect').addEventListener('change', async function() {
       const studentId = this.value;
       if(!studentId) return;
@@ -468,12 +524,10 @@
       renderReportTable(records);
     });
     
-    // כפתור שמירה
     document.getElementById('saveAllBtn').addEventListener('click', async function() {
       await updateRecords();
     });
     
-    // כפתור עדכון מסכתות ופרקים
     document.getElementById('updateBtn').addEventListener('click', function() {
       const studentSelect = document.getElementById('studentSelect');
       const studentId = studentSelect.value;
@@ -484,62 +538,88 @@
       window.location.href = `https://your-webhook-url.com/?studentId=${encodeURIComponent(studentId)}`;
     });
     
-    // אתחול ראשוני: מילוי Dropdown בתלמידים
     (async function init() {
       await populateStudentDropdown();
     })();
     
-    // --- לוגיקת הפתיחה/סגירה של תפריט הפילטר ---
+    // --- לוגיקת פתיחה/סגירה של תפריט הפילטר ---
     const filterBtn = document.getElementById('filterBtn');
     const filterContainer = document.getElementById('filterContainer');
+    const closeFilterBox = document.getElementById('closeFilterBox');
 
-    filterBtn.addEventListener('click', () => {
-      // אם מוסתר -> הצג; אם מוצג -> הסתר
+    filterBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
       filterContainer.style.display =
         (filterContainer.style.display === 'none' || !filterContainer.style.display)
         ? 'block'
         : 'none';
     });
 
-    // --- פונקציות הסינון ---
+    closeFilterBox.addEventListener('click', (event) => {
+      event.stopPropagation();
+      filterContainer.style.display = 'none';
+    });
+
+    document.addEventListener('click', (event) => {
+      const filterBox = document.getElementById('filterBox');
+      const isClickInside = filterBox.contains(event.target) || filterBtn.contains(event.target);
+      if (!isClickInside) {
+        filterContainer.style.display = 'none';
+      }
+    });
+
+    // --- פונקציות הסינון (כולל הסתרת שורות קיבוץ אם ריקות) ---
     function applyFilter() {
-      const shaareiFilter = document.getElementById('filterShaarei').value; // "checked"/"unchecked" או ריק
-      const toratoFilter = document.getElementById('filterTorato').value;   // אחת האפשרויות או ריק
-      
+      const shaareiFilter = document.getElementById('filterShaarei').value;
+      const toratoFilter = document.getElementById('filterTorato').value;
       const rows = document.querySelectorAll('#reportDataContainer tbody tr');
       
-      rows.forEach(row => {
-        // דילוג על שורות קבוצה (בעלות colspan)
-        if (row.firstChild && row.firstChild.hasAttribute("colspan")) return;
-        
-        // ע"פ המימוש הנוכחי:
-        //   עמודה 0 => פרק 2
-        //   עמודה 1 => מדף
-        //   עמודה 2 => עד דף
-        //   עמודה 3 => מס' דפים
-        //   עמודה 4 => שערי יצחק (checkbox)
-        //   עמודה 5 => תורתו (select)
-        const shaareiChecked = row.querySelector('td:nth-child(5) input[type="checkbox"]').checked;
-        const toratoValue = row.querySelector('td:nth-child(6) select').value;
-        
+      let i = 0;
+      while (i < rows.length) {
+        const row = rows[i];
+        if (!row.dataset.recordId) {
+          row.style.display = '';
+          i++;
+          continue;
+        }
         let show = true;
-        
-        // סינון לפי "שערי יצחק"
+        const cells = row.querySelectorAll('td');
+        const shaareiChecked = cells[4].querySelector('input[type="checkbox"]').checked;
+        const toratoValue = cells[5].querySelector('select').value;
         if (shaareiFilter === 'checked' && !shaareiChecked) show = false;
         if (shaareiFilter === 'unchecked' && shaareiChecked) show = false;
-        
-        // סינון לפי "תורתו"
         if (toratoFilter && toratoValue !== toratoFilter) show = false;
-        
-        // הצג/הסתר את השורה
         row.style.display = show ? '' : 'none';
-      });
+        i++;
+      }
+      
+      i = 0;
+      while (i < rows.length) {
+        const row = rows[i];
+        if (!row.dataset.recordId) {
+          const groupRow = row;
+          let hasVisibleData = false;
+          i++;
+          while (i < rows.length) {
+            if (!rows[i].dataset.recordId) break;
+            if (rows[i].style.display !== 'none') {
+              hasVisibleData = true;
+            }
+            i++;
+          }
+          if (!hasVisibleData) {
+            groupRow.style.display = 'none';
+          }
+        } else {
+          i++;
+        }
+      }
     }
 
     function clearFilter() {
       document.getElementById('filterShaarei').value = '';
       document.getElementById('filterTorato').value = '';
-      applyFilter(); // מציג מחדש את כל השורות
+      applyFilter();
     }
 
     document.getElementById('applyFilterBtn').addEventListener('click', applyFilter);
