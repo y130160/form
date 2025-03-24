@@ -18,7 +18,7 @@
       position: relative;
       width: 90%;
       max-width: 800px;
-      margin: 60px auto 100px auto;
+      margin: 80px auto 100px auto; /* רווח עליון כדי לא להיצמד לראש הדף */
       background-color: #fff;
       padding: 20px;
       padding-top: 60px;
@@ -34,79 +34,69 @@
       margin-top: 10px;
       margin-bottom: 20px;
     }
-    label[for="studentSelect"] {
-      font-size: 1.3em;
-      font-weight: bold;
-      display: block;
-      margin-bottom: 8px;
+    /* מעטפת לתפריט הבחירה עם כפתורי ניווט משני צדדיו */
+    .student-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
     }
+    /* כפתורי ניווט – גדלים ועיצוב אחיד */
+    .student-nav button {
+      font-size: 1.1em;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 50px;
+      background-color: #b8860b;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    /* עיצוב לתפריט הבחירה עצמו */
     #studentSelect {
       width: 100%;
       max-width: 300px;
-      margin-bottom: 20px;
       padding: 5px;
-      height: 40px;
+      height: 40px; 
       background-color: #f0f0f0;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 1em;
       box-sizing: border-box;
     }
-    /* עיצוב כללי לכפתורים (לא כולל מחיקה) */
-    button {
-      font-size: 1.1em;
-      padding: 12px 20px;
-      margin: 5px;
-      border: none;
-      border-radius: 50px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+    /* כפתור עדכן מסכתות ופרקים – שממוקם בחלק העליון השמאלי של הקונטיינר */
     #updateBtn {
+      font-size: 1.1em;
       position: absolute;
       top: 20px;
       left: 20px;
       background-color: #b8860b;
       color: #fff;
       border: 2px solid #fff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
       z-index: 1000;
     }
-    .nav-buttons {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      display: flex;
-      gap: 10px;
-      z-index: 1000;
-      position: sticky;
-    }
-    .nav-buttons button {
-      background-color: #b8860b;
-      color: #fff;
-      border: 2px solid #fff;
-      
-    }
+    /* כפתור שמירה בתחתית הקונטיינר */
     #saveAllBtn {
+      font-size: 1.1em;
       position: absolute;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      width: 90%;
+      width: 50%;
       background-color: #b8860b;
       color: #fff;
       border: 2px solid #fff;
-    }
-    /* כפתור מחיקה – הקטן יותר */
-    .deleteBtn {
-      background-color: #dc3545;
-      color: #fff;
-      border: 2px solid #fff;
-      font-size: 0.9em;
-      padding: 5px 10px;
+      padding: 12px 20px;
       border-radius: 50px;
+      font-weight: bold;
       cursor: pointer;
     }
-    /* עיצוב לטבלה – הפחתת רווח בין התאים */
+    /* עיצוב לטבלה – רווח מינימלי */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -117,7 +107,7 @@
       color: #fff;
     }
     th, td {
-      padding: 3px; /* הפחתת padding ל-3px */
+      padding: 3px;
       border: 1px solid #ddd;
       text-align: center;
       white-space: normal;
@@ -133,7 +123,7 @@
     .editable {
       width: 100%;
       min-height: 30px;
-      padding: 3px;  /* הפחתת padding */
+      padding: 3px;
       box-sizing: border-box;
       border: 1px solid #ccc;
       border-radius: 4px;
@@ -143,41 +133,55 @@
     }
     select {
       width: 100%;
-      padding: 3px;  /* הפחתת padding */
+      padding: 3px;
       box-sizing: border-box;
+    }
+    /* כפתור מחיקה – קטן יותר */
+    .deleteBtn {
+      background-color: #dc3545;
+      color: #fff;
+      border: 2px solid #fff;
+      font-size: 0.9em;
+      padding: 5px 10px;
+      border-radius: 50px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <button id="updateBtn">עדכן מסכתות ופרקים</button>
-    <div class="nav-buttons">
-      <button id="prevBtn">תלמיד קודם</button>
-      <button id="nextBtn">תלמיד הבא</button>
-    </div>
+    
     <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו">
     <h2>נתוני תלמיד - הכנה לדוח</h2>
-    <label for="studentSelect">בחר תלמיד:</label>
-    <select id="studentSelect">
-      <option value="">בחר תלמיד</option>
-    </select>
+
+    <!-- מעטפת לתפריט הבחירה עם כפתורי ניווט משני צדדיו (מתחת לכותרת) -->
+    <div class="student-nav">
+      <!-- כפתור "תלמיד הבא" בצד ימין -->
+      <button id="prevBtn">תלמיד הקודם</button>
+      <!-- תפריט הבחירה באמצע -->
+      <select id="studentSelect">
+        <option value="">בחר תלמיד</option>
+      </select>
+      <!-- כפתור "תלמיד קודם" בצד שמאל -->
+      <button id="nextBtn">תלמיד הבא</button>
+    </div>
+    
     <div id="reportDataContainer"></div>
+    
     <button id="saveAllBtn" class="saveBtn" style="display:none;">שמירה</button>
   </div>
   
   <script>
-    // פרטי חיבור לאיירטייבל – עדכן לפי הפרטים שלך
     const AIRTABLE_API_KEY = 'patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749';
     const AIRTABLE_BASE_ID = 'appanZGbMogA0mxRl';
     const STUDENTS_TABLE = 'רשימת אברכים';
     const REPORT_TABLE = 'הכנה לדוח';
     const SORT_FIELD = 'משפחה ופרטי';
     
-    // אפשרויות לשדות single select:
     const סוגOptions = ['שערי יצחק', 'תורתו'];
     const עדכוןOptions = ['אין שינוי ✅', 'נא לעדכן ❌', 'חדש'];
     
-    // Headers לבקשות
     const headers = {
       'Authorization': 'Bearer ' + AIRTABLE_API_KEY,
       'Content-Type': 'application/json'
@@ -312,7 +316,7 @@
         cell5.appendChild(editable5);
         tr.appendChild(cell5);
         
-        // פעולות - כפתור מחיקה קטן יותר
+        // פעולות - כפתור מחיקה קטן
         const cellActions = document.createElement('td');
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'מחק';
@@ -383,6 +387,7 @@
       }
     }
     
+    // אירוע שינוי תלמיד
     document.getElementById('studentSelect').addEventListener('change', async function() {
       const studentId = this.value;
       if(!studentId) return;
@@ -390,10 +395,12 @@
       renderReportTable(records);
     });
     
+    // כפתור שמירה
     document.getElementById('saveAllBtn').addEventListener('click', async function() {
       await updateRecords();
     });
     
+    // כפתור עדכן מסכתות ופרקים
     document.getElementById('updateBtn').addEventListener('click', function() {
       const studentSelect = document.getElementById('studentSelect');
       const studentId = studentSelect.value;
@@ -404,6 +411,7 @@
       window.location.href = `https://your-webhook-url.com/?studentId=${encodeURIComponent(studentId)}`;
     });
     
+    // כפתור "תלמיד הבא" (prevBtn)
     document.getElementById('prevBtn').addEventListener('click', function() {
       const select = document.getElementById('studentSelect');
       const options = Array.from(select.options);
@@ -416,6 +424,7 @@
       }
     });
     
+    // כפתור "תלמיד קודם" (nextBtn)
     document.getElementById('nextBtn').addEventListener('click', function() {
       const select = document.getElementById('studentSelect');
       const options = Array.from(select.options);
@@ -428,6 +437,7 @@
       }
     });
     
+    // אתחול
     populateStudentDropdown();
   </script>
 </body>
