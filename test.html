@@ -18,7 +18,7 @@
       position: relative;
       width: 90%;
       max-width: 800px;
-      margin: 80px auto 100px auto;
+      margin: 60px auto 100px auto;
       background-color: #fff;
       padding: 20px;
       padding-top: 60px;
@@ -37,14 +37,31 @@
     label[for="studentSelect"] {
       font-size: 1.3em;
       font-weight: bold;
-      display: block;
+      display: block; 
       margin-bottom: 8px;
+    }
+    /* מעטפת לכפתורי נווט (תלמיד קודם / הבא) */
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center; /* ממקם את הכפתורים במרכז */
+      margin-bottom: 15px;     /* רווח קטן מתחת לכפתורים */
+    }
+    .nav-buttons button {
+      font-size: 1.1em;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 50px;
+      background-color: #b8860b;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
     }
     #studentSelect {
       width: 100%;
       max-width: 300px;
       padding: 5px;
-      height: 40px;
+      height: 40px; 
       background-color: #f0f0f0;
       border: 1px solid #ccc;
       border-radius: 6px;
@@ -78,6 +95,11 @@
       border-radius: 50px;
       font-weight: bold;
       cursor: pointer;
+    }
+    /* צמצום רוחב הטבלה והמרכזתה */
+    .table-container {
+      max-width: 600px; 
+      margin: 0 auto;   /* מרכזת אופקית */
     }
     table {
       width: 100%;
@@ -123,12 +145,6 @@
       padding: 3px;
       box-sizing: border-box;
     }
-    /* מחיקת כפתור המחיקה – לא מוצג */
-    .deleteBtn {
-      display: none;
-    }
-    /* עיצוב לתפריט "תורתו" – העדכון: האפשרויות הן אלו שהוזכרו */
-    /* נגדיר מחלקה עבור זה, אך נשתמש ישירות באפשרויות */
   </style>
 </head>
 <body>
@@ -138,42 +154,60 @@
     <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו">
     <h2>נתוני תלמיד - שערי יצחק</h2>
     
+    <!-- כפתורי נווט (תלמיד קודם/תלמיד הבא) -->
+    <div class="nav-buttons">
+      <button id="prevBtn">תלמיד קודם</button>
+      <button id="nextBtn">תלמיד הבא</button>
+    </div>
+
     <label for="studentSelect">בחר תלמיד:</label>
     <select id="studentSelect">
       <option value="">בחר תלמיד</option>
     </select>
     
-    <div id="reportDataContainer"></div>
+    <div class="table-container">
+      <div id="reportDataContainer"></div>
+    </div>
     
     <button id="saveAllBtn" class="saveBtn" style="display:none;">שמירה</button>
   </div>
   
   <script>
-    // פרטי החיבור לאיירטייבל
-    const AIRTABLE_API_KEY = 'patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749';
-    const AIRTABLE_BASE_ID = 'appanZGbMogA0mxRl';
+    const AIRTABLE_API_KEY = 'YOUR_API_KEY';
+    const AIRTABLE_BASE_ID = 'YOUR_BASE_ID';
     const STUDENTS_TABLE = 'רשימת אברכים';
-    const NEW_TABLE = 'שערי יצחק'; // טבלת "שערי יצחק"
+    const NEW_TABLE = 'שערי יצחק'; 
     const SORT_FIELD = 'משפחה ופרטי';
     
-    // אפשרויות לשדה "תורתו" – כעת האפשרויות הן:
+    // אפשרויות לשדה "תורתו"
     const תורתוOptions = ["הזמין", "בוצע", "עבר", "לא עבר", "לא בוצע"];
     
-    const headers = {
-      'Authorization': 'Bearer ' + AIRTABLE_API_KEY,
-      'Content-Type': 'application/json'
-    };
+    // אוספים את כל הרשומות ללא הגבלת 100 ע"י פאג'ינציה
+    async function fetchAllRecords(tableName, queryParams="") {
+      let allRecords = [];
+      let offset = "";
+      do {
+        let url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableName)}?${queryParams}`;
+        if(offset) {
+          url += `&offset=${offset}`;
+        }
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_API_KEY}`
+          }
+        });
+        const data = await response.json();
+        if(data.records) {
+          allRecords = allRecords.concat(data.records);
+        }
+        offset = data.offset;
+      } while(offset);
+      return allRecords;
+    }
     
     async function fetchStudents() {
-      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(STUDENTS_TABLE)}?sort[0][field]=${encodeURIComponent(SORT_FIELD)}`;
-      try {
-        const response = await fetch(url, { headers });
-        const data = await response.json();
-        return data.records;
-      } catch (error) {
-        console.error('Error fetching students:', error);
-        return [];
-      }
+      const query = `sort[0][field]=${encodeURIComponent(SORT_FIELD)}`;
+      return await fetchAllRecords(STUDENTS_TABLE, query);
     }
     
     async function populateStudentDropdown() {
@@ -187,21 +221,17 @@
       });
     }
     
+    // משיכת רשומות מטבלת "שערי יצחק" עם פאג'ינציה
     async function fetchReportData(studentId) {
-      // סינון לפי "IDתלמיד"
+      // סינון לפי "IDתלמיד" 
       const formula = encodeURIComponent(`IF(FIND("${studentId}", ARRAYJOIN({IDתלמיד})), TRUE(), FALSE())`);
-      // מיון לפי "מסכת" ואז לפי "מספר" (בהנחה ששדות אלו קיימים בטבלה "שערי יצחק")
-      const sortParams = `&sort[0][field]=${encodeURIComponent("מסכת")}&sort[0][direction]=asc&sort[1][field]=${encodeURIComponent("מספר")}&sort[1][direction]=asc`;
-      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(NEW_TABLE)}?filterByFormula=${formula}${sortParams}`;
-      try {
-        const response = await fetch(url, { headers });
-        const data = await response.json();
-        console.log('Fetched report data:', data.records);
-        return data.records;
-      } catch (error) {
-        console.error('Error fetching report data:', error);
-        return [];
-      }
+      // מיון לפי "מסכת ומספר"
+      // + משיכת כל הרשומות בפאג'ינציה
+      const sortParams = `sort[0][field]=${encodeURIComponent("מסכת ומספר")}&sort[0][direction]=asc`;
+      const query = `filterByFormula=${formula}&${sortParams}`;
+      const records = await fetchAllRecords(NEW_TABLE, query);
+      console.log('Fetched report data:', records);
+      return records;
     }
     
     function renderReportTable(records) {
@@ -216,7 +246,7 @@
       const table = document.createElement('table');
       const thead = document.createElement('thead');
       const headerRow = document.createElement('tr');
-      // כותרות: פרק 2, מדף, עד דף, מס' דפים, שערי יצחק, תורתו
+      // כותרות העמודות
       const headersArray = ['פרק 2', 'מדף', 'עד דף', 'מס\' דפים', 'שערי יצחק', 'תורתו'];
       headersArray.forEach(text => {
         const th = document.createElement('th');
@@ -227,47 +257,52 @@
       table.appendChild(thead);
       
       const tbody = document.createElement('tbody');
-      let currentGroup = "";
+      let currentGroup = ""; // הערך האחרון של "מסכת ומספר"
       
       records.forEach(record => {
-        const groupValue = (record.fields["מסכת"] || "") + " - " + (record.fields["מספר"] || "");
-        // אם הקבוצה משתנה, הוסף שורת קבוצה
-        if (groupValue !== currentGroup) {
+        const fields = record.fields;
+        // נשתמש בשדה "מסכת ומספר" כערך הקבוצה
+        const groupValue = fields["מסכת ומספר"] || "";
+        // אבל בשורת הקבוצה נציג את השדה "מסכתות"
+        const groupDisplay = fields["מסכתות"] || "";
+        
+        // אם הקבוצה השתנתה – מוסיפים שורת קבוצה
+        if(groupValue !== currentGroup) {
           currentGroup = groupValue;
           const groupRow = document.createElement('tr');
           const groupCell = document.createElement('td');
-          groupCell.colSpan = 6;
-          groupCell.textContent = currentGroup;
+          groupCell.colSpan = headersArray.length;
+          groupCell.textContent = groupDisplay; 
           groupCell.className = 'group-header';
           groupRow.appendChild(groupCell);
           tbody.appendChild(groupRow);
         }
         
+        // כעת מוסיפים את השורה עצמה
         const tr = document.createElement('tr');
         tr.dataset.recordId = record.id;
-        const fields = record.fields;
         
-        // עמודה 0: פרק 2 – טקסט
+        // עמודה 0: פרק 2
         const cell0 = document.createElement('td');
         cell0.textContent = fields['פרק 2'] || '';
         tr.appendChild(cell0);
         
-        // עמודה 1: מדף – טקסט
+        // עמודה 1: מדף
         const cell1 = document.createElement('td');
         cell1.textContent = fields['מדף'] || '';
         tr.appendChild(cell1);
         
-        // עמודה 2: עד דף – טקסט
+        // עמודה 2: עד דף
         const cell2 = document.createElement('td');
         cell2.textContent = fields['עד דף'] || '';
         tr.appendChild(cell2);
         
-        // עמודה 3: מס' דפים – טקסט/מספר
+        // עמודה 3: מס' דפים
         const cell3 = document.createElement('td');
         cell3.textContent = fields['מס\' דפים'] || '';
         tr.appendChild(cell3);
         
-        // עמודה 4: שערי יצחק – Checkbox (editable)
+        // עמודה 4: שערי יצחק (checkbox)
         const cell4 = document.createElement('td');
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
@@ -275,7 +310,7 @@
         cell4.appendChild(checkbox);
         tr.appendChild(cell4);
         
-        // עמודה 5: תורתו – Dropdown (editable)
+        // עמודה 5: תורתו (dropdown)
         const cell5 = document.createElement('td');
         const selectTorato = document.createElement('select');
         const defaultOption = document.createElement('option');
@@ -305,12 +340,14 @@
       if(tableRows.length === 0) return;
       const recordsToUpdate = [];
       
-      // עבור כל שורה, נעדכן רק את שני השדות: "שערי יצחק" ו"תורתו"
       tableRows.forEach(tr => {
-        // דלג על שורות הקבוצה (group header) שיש להן colspan
+        // דלג על שורות הקבוצה
         if(tr.firstChild && tr.firstChild.hasAttribute("colspan")) return;
+        
         const recordId = tr.dataset.recordId;
         const cells = tr.querySelectorAll('td');
+        
+        // "שערי יצחק" בעמודה 4, "תורתו" בעמודה 5
         const updatedFields = {
           'שערי יצחק': cells[4].querySelector('input[type="checkbox"]').checked,
           'תורתו': cells[5].querySelector('select').value
@@ -324,7 +361,10 @@
         try {
           const response = await fetch(url, {
             method: 'PATCH',
-            headers,
+            headers: {
+              Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ records: batch })
           });
           const data = await response.json();
@@ -338,9 +378,31 @@
       alert('הרשומות עודכנו בהצלחה.');
     }
     
-    async function deleteRecord(recordId) {
-      // כפתור המחיקה הוסר, פונקציה זו לא תהיה בשימוש
-    }
+    // כפתור "תלמיד הבא"
+    document.getElementById('nextBtn').addEventListener('click', function() {
+      const select = document.getElementById('studentSelect');
+      const options = Array.from(select.options);
+      const currentIndex = options.findIndex(option => option.selected);
+      if(currentIndex < options.length - 1) {
+        select.selectedIndex = currentIndex + 1;
+        select.dispatchEvent(new Event('change'));
+      } else {
+        alert('אין תלמיד הבא.');
+      }
+    });
+    
+    // כפתור "תלמיד קודם"
+    document.getElementById('prevBtn').addEventListener('click', function() {
+      const select = document.getElementById('studentSelect');
+      const options = Array.from(select.options);
+      const currentIndex = options.findIndex(option => option.selected);
+      if(currentIndex > 1) {
+        select.selectedIndex = currentIndex - 1;
+        select.dispatchEvent(new Event('change'));
+      } else {
+        alert('אין תלמיד קודם.');
+      }
+    });
     
     document.getElementById('studentSelect').addEventListener('change', async function() {
       const studentId = this.value;
@@ -360,10 +422,14 @@
         alert('אנא בחר תלמיד תחילה.');
         return;
       }
+      // הפניה לאיזה webhook שתגדיר
       window.location.href = `https://your-webhook-url.com/?studentId=${encodeURIComponent(studentId)}`;
     });
     
-    populateStudentDropdown();
+    // אתחול
+    (async function init() {
+      await populateStudentDropdown();
+    })();
   </script>
 </body>
 </html>
