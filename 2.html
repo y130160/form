@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>דף נתונים - שערי יצחק</title>
+  <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://y130160.github.io/form/לוגו בני ברק.png">
+  <style>
+    body {
+      font-family: 'Times New Roman', serif;
+      background-color: #f8f9fa;
+      text-align: center;
+      direction: rtl;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      position: relative;
+      width: 90%;
+      max-width: 800px;
+      margin: 60px auto 100px auto;
+      background-color: #fff;
+      padding: 20px;
+      padding-top: 60px;
+      padding-bottom: 120px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    img.logo {
+      width: 100px;
+      margin-bottom: 10px;
+    }
+    h2 {
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    /* כפתור "עדכן מסכתות ופרקים" */
+    #updateBtn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #b8860b;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    /* מעטפת עבור הכפתורים ותפריט הבחירה באותה שורה */
+    .nav-row {
+      display: flex;
+      justify-content: center; /* למקם באמצע */
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .nav-row button {
+      font-size: 1.1em;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 50px;
+      background-color: #b8860b;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #studentSelect {
+      width: 100%;
+      max-width: 300px;
+      padding: 5px;
+      height: 40px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    /* כפתור "שמירה" בתחתית */
+    #saveAllBtn {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      background-color: #b8860b;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    /* צמצום רוחב הטבלה והמרכזתה */
+    .table-container {
+      max-width: 600px; /* מצמצם רוחב */
+      margin: 0 auto;   /* מרכזת אופקית */
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    thead {
+      background-color: #007bff;
+      color: #fff;
+    }
+    th, td {
+      padding: 3px;
+      border: 1px solid #ddd;
+      text-align: center;
+      white-space: normal;
+      word-wrap: break-word;
+      overflow: visible;
+    }
+    tbody tr:nth-child(odd) {
+      background-color: #f2f2f2;
+    }
+    tbody tr:hover {
+      background-color: #e9ecef;
+    }
+    .group-header {
+      background-color: #ddd;
+      font-weight: bold;
+      text-align: center;
+    }
+    .editable {
+      width: 100%;
+      min-height: 30px;
+      padding: 3px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      white-space: normal;
+      word-wrap: break-word;
+      overflow: visible;
+    }
+    select {
+      width: 100%;
+      padding: 3px;
+      box-sizing: border-box;
+    }
+
+    /* סגנון לחלונית הפילטר (מיקום + עיצוב) */
+    #filterContainer {
+      display: none; 
+      position: absolute; 
+      top: 100px;   /* ניתן להתאים לפי הצורך */
+      left: 20px;   /* ניתן להתאים לפי הצורך */
+      z-index: 9999;
+    }
+    #filterBox {
+      background: #fff; 
+      border: 1px solid #ccc; 
+      border-radius: 8px; 
+      padding: 10px; 
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2); 
+      width: 180px;
+      text-align: right; 
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button id="updateBtn">עדכן מסכתות ופרקים</button>
+    
+    <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו">
+    <h2>נתוני הכולל - הכנה לדוח</h2>
+
+    <!-- שורה אחת עם כפתור פילטר, כפתור "תלמיד קודם", select, כפתור "תלמיד הבא" -->
+    <div class="nav-row">
+      <!-- כפתור פילטר (אימוג׳י בלבד) -->
+      <button id="filterBtn" 
+              style="font-size: 1.5em; background: none; border: none; cursor: pointer;">
+        <img src="https://y130160.github.io/form/פילטר.png" alt="פילטר">
+      </button>
+
+      <button id="prevBtn">תלמיד קודם</button>
+      <select id="studentSelect">
+        <option value="">בחר תלמיד</option>
+      </select>
+      <button id="nextBtn">תלמיד הבא</button>
+    </div>
+    
+    <!-- תפריט הפילטר (מוסתר כברירת מחדל) -->
+    <div id="filterContainer">
+      <div id="filterBox">
+        <h4 style="margin-top:0;">סינון</h4>
+
+        <label>שערי יצחק:</label>
+        <select id="filterShaarei" style="width:100%;">
+          <option value="">(הצג הכל)</option>
+          <option value="checked">מסומן ✔️</option>
+          <option value="unchecked">לא מסומן ❌</option>
+        </select>
+        <br><br>
+
+        <label>תורתו:</label>
+        <select id="filterTorato" style="width:100%;">
+          <option value="">(הצג הכל)</option>
+          <option value="הזמין">הזמין</option>
+          <option value="בוצע">בוצע</option>
+          <option value="עבר">עבר</option>
+          <option value="לא עבר">לא עבר</option>
+          <option value="לא בוצע">לא בוצע</option>
+        </select>
+        <br><br>
+
+        <button id="applyFilterBtn">החל</button>
+        <button id="clearFilterBtn">נקה</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div id="reportDataContainer"></div>
+    </div>
+    
+    <button id="saveAllBtn" class="saveBtn" style="display:none;">שמירה</button>
+  </div>
+  
+  <script>
+    // החלף בערכים האמיתיים שלך
+    const AIRTABLE_API_KEY = 'patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749';
+    const AIRTABLE_BASE_ID = 'appanZGbMogA0mxRl';
+    
+    // טבלת התלמידים
+    const STUDENTS_TABLE = 'רשימת אברכים';
+    // טבלת "שערי יצחק"
+    const NEW_TABLE = 'שערי יצחק';
+    
+    // אפשרויות לשדה "תורתו"
+    const תורתוOptions = ["הזמין", "בוצע", "עבר", "לא עבר", "לא בוצע"];
+    
+    // פונקציה שמביאה את כל הרשומות (ללא מגבלת 100)
+    async function fetchAllRecords(tableName, queryParams="") {
+      let allRecords = [];
+      let offset = "";
+      do {
+        let url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableName)}?${queryParams}`;
+        if(offset) {
+          url += `&offset=${offset}`;
+        }
+        const response = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_API_KEY}`
+          }
+        });
+        const data = await response.json();
+        if(data.records) {
+          allRecords = allRecords.concat(data.records);
+        }
+        offset = data.offset;
+      } while(offset);
+      return allRecords;
+    }
+    
+    // מביא את רשימת התלמידים (למילוי ה-Select)
+    async function fetchStudents() {
+      const query = `sort[0][field]=משפחה ופרטי`; 
+      return await fetchAllRecords(STUDENTS_TABLE, query);
+    }
+    
+    async function populateStudentDropdown() {
+      const select = document.getElementById('studentSelect');
+      const students = await fetchStudents();
+      students.forEach(record => {
+        const option = document.createElement('option');
+        option.value = record.id; // ה-Record ID
+        option.textContent = record.fields["משפחה ופרטי"] || 'ללא שם';
+        select.appendChild(option);
+      });
+    }
+    
+    // מביא את רשומות "שערי יצחק" לפי IDתלמיד, וממיין לפי "מס' מסכת" ואז "מס' פרק"
+    async function fetchReportData(studentId) {
+      const formula = encodeURIComponent(`IF(FIND("${studentId}", ARRAYJOIN({IDתלמיד})), TRUE(), FALSE())`);
+      // מיון לפי "מס' מסכת" -> asc, ואז "מס' פרק" -> asc
+      const sortParams = `sort[0][field]=${encodeURIComponent("מס' מסכת")}&sort[0][direction]=asc&sort[1][field]=${encodeURIComponent("מס' פרק")}&sort[1][direction]=asc`;
+      const query = `filterByFormula=${formula}&${sortParams}`;
+      const records = await fetchAllRecords(NEW_TABLE, query);
+      console.log('Fetched report data:', records);
+      return records;
+    }
+    
+    function renderReportTable(records) {
+      const container = document.getElementById('reportDataContainer');
+      container.innerHTML = '';
+      if(records.length === 0) {
+        container.textContent = 'אין נתונים להצגה.';
+        document.getElementById('saveAllBtn').style.display = 'none';
+        return;
+      }
+      
+      // יצירת טבלה
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      
+      // כותרות העמודות
+      const headersArray = ['פרק 2', 'מדף', 'עד דף', 'מס\' דפים', 'שערי יצחק', 'תורתו'];
+      headersArray.forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+      
+      const tbody = document.createElement('tbody');
+      let currentGroup = ""; // הערך האחרון של "מסכת ומספר"
+      
+      records.forEach(record => {
+        const fields = record.fields;
+        
+        // קיבוץ לפי "מסכת ומספר"
+        const groupValue = fields["מסכתות"] || "";
+        // בשורת הקבוצה נציג את השדה "מסכתות"
+        const groupDisplay = fields["מסכתות"] || "";
+        
+        // אם groupValue שונה מ-currentGroup => הוסף שורת קבוצה
+        if(groupValue !== currentGroup) {
+          currentGroup = groupValue;
+          const groupRow = document.createElement('tr');
+          const groupCell = document.createElement('td');
+          groupCell.colSpan = headersArray.length;
+          groupCell.textContent = groupDisplay;
+          groupCell.className = 'group-header';
+          groupRow.appendChild(groupCell);
+          tbody.appendChild(groupRow);
+        }
+        
+        // כעת יוצרים שורת נתונים
+        const tr = document.createElement('tr');
+        tr.dataset.recordId = record.id;
+        
+        // עמודה 0: פרק 2
+        const cell0 = document.createElement('td');
+        cell0.textContent = fields['פרק 2'] || '';
+        tr.appendChild(cell0);
+        
+        // עמודה 1: מדף
+        const cell1 = document.createElement('td');
+        cell1.textContent = fields['מדף'] || '';
+        tr.appendChild(cell1);
+        
+        // עמודה 2: עד דף
+        const cell2 = document.createElement('td');
+        cell2.textContent = fields['עד דף'] || '';
+        tr.appendChild(cell2);
+        
+        // עמודה 3: מס' דפים
+        const cell3 = document.createElement('td');
+        cell3.textContent = fields['מס\' דפים'] || '';
+        tr.appendChild(cell3);
+        
+        // עמודה 4: שערי יצחק (Checkbox)
+        const cell4 = document.createElement('td');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = fields['שערי יצחק'] || false;
+        cell4.appendChild(checkbox);
+        tr.appendChild(cell4);
+        
+        // עמודה 5: תורתו (Dropdown)
+        const cell5 = document.createElement('td');
+        const selectTorato = document.createElement('select');
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'בחר תורתו';
+        selectTorato.appendChild(defaultOption);
+        
+        תורתוOptions.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          if(opt === fields['תורתו']) option.selected = true;
+          selectTorato.appendChild(option);
+        });
+        cell5.appendChild(selectTorato);
+        tr.appendChild(cell5);
+        
+        tbody.appendChild(tr);
+      });
+      
+      table.appendChild(tbody);
+      container.appendChild(table);
+      
+      // הצגת כפתור השמירה
+      document.getElementById('saveAllBtn').style.display = 'block';
+    }
+    
+    async function updateRecords() {
+      const tableRows = document.querySelectorAll('#reportDataContainer tbody tr');
+      if(tableRows.length === 0) return;
+      
+      const recordsToUpdate = [];
+      tableRows.forEach(tr => {
+        // דלג על שורות הקבוצה
+        if(tr.firstChild && tr.firstChild.hasAttribute("colspan")) return;
+        
+        const recordId = tr.dataset.recordId;
+        const cells = tr.querySelectorAll('td');
+        
+        // "שערי יצחק" בעמודה 4, "תורתו" בעמודה 5
+        const updatedFields = {
+          'שערי יצחק': cells[4].querySelector('input[type="checkbox"]').checked,
+          'תורתו': cells[5].querySelector('select').value
+        };
+        recordsToUpdate.push({ id: recordId, fields: updatedFields });
+      });
+      
+      // עדכון בקבוצות של עד 10 רשומות (מגבלת Airtable)
+      for(let i = 0; i < recordsToUpdate.length; i += 10) {
+        const batch = recordsToUpdate.slice(i, i + 10);
+        const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(NEW_TABLE)}`;
+        try {
+          const response = await fetch(url, {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ records: batch })
+          });
+          const data = await response.json();
+          console.log('Updated batch:', data);
+        } catch (error) {
+          console.error('Error updating records:', error);
+          alert('אירעה שגיאה בעדכון הרשומות.');
+          return;
+        }
+      }
+      alert('הרשומות עודכנו בהצלחה.');
+    }
+    
+    // ניווט לתלמיד הבא
+    document.getElementById('nextBtn').addEventListener('click', function() {
+      const select = document.getElementById('studentSelect');
+      const options = Array.from(select.options);
+      const currentIndex = options.findIndex(option => option.selected);
+      if(currentIndex < options.length - 1) {
+        select.selectedIndex = currentIndex + 1;
+        select.dispatchEvent(new Event('change'));
+      } else {
+        alert('אין תלמיד הבא.');
+      }
+    });
+    
+    // ניווט לתלמיד קודם
+    document.getElementById('prevBtn').addEventListener('click', function() {
+      const select = document.getElementById('studentSelect');
+      const options = Array.from(select.options);
+      const currentIndex = options.findIndex(option => option.selected);
+      if(currentIndex > 1) {
+        select.selectedIndex = currentIndex - 1;
+        select.dispatchEvent(new Event('change'));
+      } else {
+        alert('אין תלמיד קודם.');
+      }
+    });
+    
+    // בעת שינוי תלמיד ב-Select, הבאת רשומות והצגת הטבלה
+    document.getElementById('studentSelect').addEventListener('change', async function() {
+      const studentId = this.value;
+      if(!studentId) return;
+      const records = await fetchReportData(studentId);
+      renderReportTable(records);
+    });
+    
+    // כפתור שמירה
+    document.getElementById('saveAllBtn').addEventListener('click', async function() {
+      await updateRecords();
+    });
+    
+    // כפתור עדכון מסכתות ופרקים
+    document.getElementById('updateBtn').addEventListener('click', function() {
+      const studentSelect = document.getElementById('studentSelect');
+      const studentId = studentSelect.value;
+      if(!studentId) {
+        alert('אנא בחר תלמיד תחילה.');
+        return;
+      }
+      window.location.href = `https://your-webhook-url.com/?studentId=${encodeURIComponent(studentId)}`;
+    });
+    
+    // אתחול ראשוני: מילוי Dropdown בתלמידים
+    (async function init() {
+      await populateStudentDropdown();
+    })();
+    
+    // --- לוגיקת הפתיחה/סגירה של תפריט הפילטר ---
+    const filterBtn = document.getElementById('filterBtn');
+    const filterContainer = document.getElementById('filterContainer');
+
+    filterBtn.addEventListener('click', () => {
+      // אם מוסתר -> הצג; אם מוצג -> הסתר
+      filterContainer.style.display =
+        (filterContainer.style.display === 'none' || !filterContainer.style.display)
+        ? 'block'
+        : 'none';
+    });
+
+    // --- פונקציות הסינון ---
+    function applyFilter() {
+      const shaareiFilter = document.getElementById('filterShaarei').value; // "checked"/"unchecked" או ריק
+      const toratoFilter = document.getElementById('filterTorato').value;   // אחת האפשרויות או ריק
+      
+      const rows = document.querySelectorAll('#reportDataContainer tbody tr');
+      
+      rows.forEach(row => {
+        // דילוג על שורות קבוצה (בעלות colspan)
+        if (row.firstChild && row.firstChild.hasAttribute("colspan")) return;
+        
+        // ע"פ המימוש הנוכחי:
+        //   עמודה 0 => פרק 2
+        //   עמודה 1 => מדף
+        //   עמודה 2 => עד דף
+        //   עמודה 3 => מס' דפים
+        //   עמודה 4 => שערי יצחק (checkbox)
+        //   עמודה 5 => תורתו (select)
+        const shaareiChecked = row.querySelector('td:nth-child(5) input[type="checkbox"]').checked;
+        const toratoValue = row.querySelector('td:nth-child(6) select').value;
+        
+        let show = true;
+        
+        // סינון לפי "שערי יצחק"
+        if (shaareiFilter === 'checked' && !shaareiChecked) show = false;
+        if (shaareiFilter === 'unchecked' && shaareiChecked) show = false;
+        
+        // סינון לפי "תורתו"
+        if (toratoFilter && toratoValue !== toratoFilter) show = false;
+        
+        // הצג/הסתר את השורה
+        row.style.display = show ? '' : 'none';
+      });
+    }
+
+    function clearFilter() {
+      document.getElementById('filterShaarei').value = '';
+      document.getElementById('filterTorato').value = '';
+      applyFilter(); // מציג מחדש את כל השורות
+    }
+
+    document.getElementById('applyFilterBtn').addEventListener('click', applyFilter);
+    document.getElementById('clearFilterBtn').addEventListener('click', clearFilter);
+  </script>
+</body>
+</html>
