@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="he">
+  <head>
+    <meta charset="UTF-8">
+    <title>דף נתונים - שערי יצחק</title>
+    <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://y130160.github.io/form/לוגו בני ברק.png">
+    <style>
+      /* עיצוב בסיסי */
+      body {
+        font-family: 'Times New Roman', serif;
+        background-color: #f8f9fa;
+        text-align: center;
+        direction: rtl;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        position: relative;
+        width: 90%;
+        max-width: 800px;
+        margin: 30px auto;
+        background-color: #fff;
+        padding: 20px;
+        padding-top: 30px;
+        padding-bottom: 80px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+      img.logo {
+        width: 80px;
+        margin-bottom: 10px;
+      }
+      h2 {
+        margin-top: 10px;
+        margin-bottom: 20px;
+      }
+      /* כפתור עדכון */
+      #updateBtn {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: #b8860b;
+        color: #fff;
+        border: 2px solid #fff;
+        padding: 12px 20px;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1000;
+      }
+      /* כפתורי ניווט */
+      .nav-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .nav-row button {
+        font-size: 1.1em;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 50px;
+        background-color: #b8860b;
+        color: #fff;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      #studentSelect {
+        width: 100%;
+        max-width: 300px;
+        padding: 5px;
+        height: 40px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1em;
+        box-sizing: border-box;
+      }
+      /* כפתור שמירה */
+      #saveAllBtn {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50%;
+        background-color: #b8860b;
+        color: #fff;
+        border: 2px solid #fff;
+        padding: 12px 20px;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      /* קונטיינר הטבלה */
+      .table-container {
+        position: relative;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      thead {
+        background-color: #007bff;
+        color: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+      th, td {
+        padding: 3px;
+        border: 1px solid #ddd;
+        text-align: center;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow: visible;
+      }
+      tbody tr:nth-child(odd) {
+        background-color: #f2f2f2;
+      }
+      tbody tr:hover {
+        background-color: #e9ecef;
+      }
+      .group-header {
+        background-color: #ddd;
+        font-weight: bold;
+        text-align: center;
+      }
+      .editable {
+        width: 100%;
+        min-height: 30px;
+        padding: 3px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow: visible;
+      }
+      select {
+        width: 100%;
+        padding: 3px;
+        box-sizing: border-box;
+      }
+      /* חלונית הפילטר */
+      #filterContainer {
+        display: none;
+        position: fixed;
+        top: 200px;
+        right: 20px;
+        z-index: 9999;
+      }
+      #filterBox {
+        background: linear-gradient(120deg, #fff3e0, #fff);
+        border: 2px solid #b8860b;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        width: 180px;
+        text-align: right;
+        position: relative;
+        font-family: 'Times New Roman', serif;
+      }
+      #closeFilterBox {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 1.2em;
+        color: #b8860b;
+        transition: transform 0.2s;
+      }
+      #closeFilterBox:hover {
+        transform: scale(1.1);
+      }
+      .filter-buttons {
+        text-align: center;
+        margin-top: 10px;
+      }
+      #filterBox button {
+        background-color: #b8860b;
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 4px;
+        font-size: 0.9em;
+      }
+      #filterBox button:hover {
+        background-color: #a6780a;
+      }
+      /* כפתור חזרה לראש */
+      #backToTop {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border: 2px solid #FFD700;
+        background-color: #fff;
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+      /* קונטיינר הסטטיסטיקות מעל הטבלה */
+      .stats-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 10px auto 20px auto;
+        max-width: 600px;
+      }
+      .stat-box {
+        border: 2px solid #b8860b;
+        border-radius: 8px;
+        padding: 3px;
+        width: 120px;
+        text-align: center;
+        background-color: #fff;
+      }
+      .stat-title {
+        font-weight: bold;
+        font-size: 1.3em;
+        margin-bottom: 5px;
+      }
+      .stat-value {
+        font-size: 1.5em;
+        color: #b8860b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <button id="updateBtn">עדכן מסכתות ופרקים</button>
+      <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו">
+      <h2>נתוני הכולל - הכנה לדוח</h2>
+      <div class="nav-row">
+        <button id="filterBtn" style="background:none; border:none; cursor:pointer;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
+            <rect width="24" height="24" fill="none" />
+            <path fill="#b8860b" d="M21 3H3v2l8 8v6l2 2v-8l8-8V3z" />
+          </svg>
+        </button>
+        <button id="prevBtn">תלמיד קודם</button>
+        <select id="studentSelect">
+          <option value="" selected disabled>בחר תלמיד</option>
+        </select>
+        <button id="nextBtn">תלמיד הבא</button>
+      </div>
+      
+      <!-- קונטיינר הסטטיסטיקות -->
+      <div class="stats-container">
+        <div class="stat-box">
+          <div class="stat-title">שערי יצחק</div>
+          <div id="shaareiValue" class="stat-value">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-title">תורתו</div>
+          <div id="toratoValue" class="stat-value">0</div>
+        </div>
+      </div>
+      
+      <div id="filterContainer">
+        <div id="filterBox">
+          <span id="closeFilterBox">X</span>
+          <h4 style="text-align: center">סינון</h4>
+          <label>שערי יצחק:</label>
+          <select id="filterShaarei">
+            <option value="">(הצג הכל)</option>
+            <option value="checked">מסומן ✔️</option>
+            <option value="unchecked">לא מסומן ❌</option>
+          </select>
+          <br>
+          <label>תורתו:</label>
+          <select id="filterTorato">
+            <option value="">(הצג הכל)</option>
+            <option value="הזמין">הזמין</option>
+            <option value="בוצע">בוצע</option>
+            <option value="עבר">עבר</option>
+            <option value="לא עבר">לא עבר</option>
+            <option value="לא בוצע">לא בוצע</option>
+          </select>
+          <div class="filter-buttons">
+            <button id="applyFilterBtn">החל</button>
+            <button id="clearFilterBtn">נקה</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="table-container">
+        <div id="reportDataContainer"></div>
+      </div>
+      
+      <button id="saveAllBtn" class="saveBtn" style="display:none;">שמירה</button>
+    </div>
+    
+    <!-- כפתור חזרה לראש, מוצב בפינה הימנית התחתונה -->
+    <button id="backToTop" title="חזרה לראש הדף">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FFD700" viewBox="0 0 24 24">
+        <path d="M12 4l-8 8h5v8h6v-8h5z"/>
+      </svg>
+    </button>
+    
+    <script>
+      // הגדרות API וטבלאות
+      const AIRTABLE_API_KEY = 'patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749';
+      const AIRTABLE_BASE_ID = 'appanZGbMogA0mxRl';
+      const STUDENTS_TABLE = 'רשימת אברכים';
+      const NEW_TABLE = 'שערי יצחק';
+      const תורתוOptions = ["הזמין", "בוצע", "עבר", "לא עבר", "לא בוצע"];
+      
+      async function fetchAllRecords(tableName, queryParams = "") {
+        let allRecords = [];
+        let offset = "";
+        do {
+          let url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableName)}?${queryParams}`;
+          if (offset) { url += `&offset=${offset}`; }
+          const response = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+          const data = await response.json();
+          if (data.records) { allRecords = allRecords.concat(data.records); }
+          offset = data.offset;
+        } while (offset);
+        return allRecords;
+      }
+      
+      async function fetchStudents() {
+        const query = `sort[0][field]=משפחה ופרטי`;
+        return await fetchAllRecords(STUDENTS_TABLE, query);
+      }
+      
+      async function populateStudentDropdown() {
+        const select = document.getElementById('studentSelect');
+        const students = await fetchStudents();
+        students.forEach(record => {
+          const option = document.createElement('option');
+          option.value = record.id;
+          option.textContent = record.fields["משפחה ופרטי"] || 'ללא שם';
+          select.appendChild(option);
+        });
+      }
+      
+      // קריאה לטבלת "רשימת אברכים" עבור נתוני סטטיסטיקה
+      async function fetchStudentData(studentId) {
+        const query = `filterByFormula=RECORD_ID()="${studentId}"`;
+        const records = await fetchAllRecords(STUDENTS_TABLE, query);
+        return records.length > 0 ? records[0] : null;
+      }
+      
+      // קריאה לטבלת "שערי יצחק" ליצירת הטבלה
+      async function fetchReportData(studentId) {
+        const formula = encodeURIComponent(`IF(FIND("${studentId}", ARRAYJOIN({IDתלמיד})), TRUE(), FALSE())`);
+        const sortParams = `sort[0][field]=${encodeURIComponent("מס' מסכת")}&sort[0][direction]=asc&sort[1][field]=${encodeURIComponent("מס' פרק")}&sort[1][direction]=asc`;
+        const query = `filterByFormula=${formula}&${sortParams}`;
+        const records = await fetchAllRecords(NEW_TABLE, query);
+        console.log('Fetched report data:', records);
+        return records;
+      }
+      
+      function renderReportTable(records) {
+        const container = document.getElementById('reportDataContainer');
+        container.innerHTML = '';
+        if (records.length === 0) {
+          container.textContent = 'אין נתונים להצגה.';
+          document.getElementById('saveAllBtn').style.display = 'none';
+          return;
+        }
+        
+        // בניית הטבלה
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        const headersArray = ['פרק', 'מדף', 'עד דף', 'מס\' דפים', 'שערי יצחק', 'תורתו'];
+        headersArray.forEach(text => {
+          const th = document.createElement('th');
+          th.textContent = text;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        
+        const tbody = document.createElement('tbody');
+        const groups = [];
+        let currentGroupName = null;
+        let currentGroupObj = null;
+        records.forEach(record => {
+          const groupValue = record.fields["מסכתות"] || "";
+          if (groupValue !== currentGroupName) {
+            currentGroupName = groupValue;
+            currentGroupObj = { groupName: groupValue, records: [] };
+            groups.push(currentGroupObj);
+          }
+          currentGroupObj.records.push(record);
+        });
+        groups.forEach(group => {
+          // חישוב סטטי של סך הדפים עבור הקבוצה (ללא תלות בסינון)
+          let totalPagesGroup = 0;
+          let sumChecked = 0;
+          let sumDone = 0;
+          group.records.forEach(r => {
+            const fields = r.fields;
+            const pages = parseInt(fields["מס' דפים"] || 0, 10);
+            totalPagesGroup += pages;
+            if (fields["שערי יצחק"]) { sumChecked += pages; }
+            if (fields["תורתו"] === "עבר") { sumDone += pages; }
+          });
+          // יצירת שורת קבוצה והגדרת הערכים הסטטיים
+          const groupRow = document.createElement('tr');
+          const groupNameCell = document.createElement('td');
+          groupNameCell.colSpan = 4;
+          groupNameCell.textContent = group.groupName + " (" + totalPagesGroup + ")";
+          groupNameCell.className = 'group-header';
+          groupRow.appendChild(groupNameCell);
+          const sumCheckedCell = document.createElement('td');
+          sumCheckedCell.className = 'group-header';
+          // עדכון החישוב כבר בשלב הרינדור הראשוני
+          sumCheckedCell.textContent = sumChecked;
+          groupRow.appendChild(sumCheckedCell);
+          const sumDoneCell = document.createElement('td');
+          sumDoneCell.className = 'group-header';
+          sumDoneCell.textContent = sumDone;
+          groupRow.appendChild(sumDoneCell);
+          // נשמור את הערך הסטטי של סך הדפים ב-dataset של שורת הקבוצה
+          groupRow.dataset.totalPages = totalPagesGroup;
+          tbody.appendChild(groupRow);
+          group.records.forEach(record => {
+            const fields = record.fields;
+            const tr = document.createElement('tr');
+            tr.dataset.recordId = record.id;
+            const cell0 = document.createElement('td');
+            cell0.textContent = fields['פרק 2'] || '';
+            tr.appendChild(cell0);
+            const cell1 = document.createElement('td');
+            cell1.textContent = fields['מדף'] || '';
+            tr.appendChild(cell1);
+            const cell2 = document.createElement('td');
+            cell2.textContent = fields['עד דף'] || '';
+            tr.appendChild(cell2);
+            const cell3 = document.createElement('td');
+            cell3.textContent = fields['מס\' דפים'] || '';
+            tr.appendChild(cell3);
+            const cell4 = document.createElement('td');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = fields['שערי יצחק'] || false;
+            cell4.appendChild(checkbox);
+            tr.appendChild(cell4);
+            const cell5 = document.createElement('td');
+            const selectTorato = document.createElement('select');
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'בחר תורתו';
+            defaultOption.selected = true;
+            defaultOption.disabled = true;
+            selectTorato.appendChild(defaultOption);
+            תורתוOptions.forEach(opt => {
+              const option = document.createElement('option');
+              option.value = opt;
+              option.textContent = opt;
+              if (opt === fields['תורתו']) option.selected = true;
+              selectTorato.appendChild(option);
+            });
+            cell5.appendChild(selectTorato);
+            tr.appendChild(cell5);
+            tbody.appendChild(tr);
+          });
+        });
+        table.appendChild(tbody);
+        container.appendChild(table);
+        document.getElementById('saveAllBtn').style.display = 'block';
+      }
+      
+      async function updateRecords() {
+        const tableRows = document.querySelectorAll('#reportDataContainer tbody tr');
+        if (tableRows.length === 0) return;
+        const recordsToUpdate = [];
+        tableRows.forEach(tr => {
+          if (!tr.dataset.recordId) return;
+          const cells = tr.querySelectorAll('td');
+          const updatedFields = {
+            'שערי יצחק': cells[4].querySelector('input[type="checkbox"]').checked,
+            'תורתו': cells[5].querySelector('select').value
+          };
+          recordsToUpdate.push({ id: tr.dataset.recordId, fields: updatedFields });
+        });
+        for (let i = 0; i < recordsToUpdate.length; i += 10) {
+          const batch = recordsToUpdate.slice(i, i + 10);
+          const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(NEW_TABLE)}`;
+          try {
+            const response = await fetch(url, {
+              method: 'PATCH',
+              headers: {
+                Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ records: batch })
+            });
+            const data = await response.json();
+            console.log('Updated batch:', data);
+          } catch (error) {
+            console.error('Error updating records:', error);
+            alert('אירעה שגיאה בעדכון הרשומות.');
+            return;
+          }
+        }
+        alert('הרשומות עודכנו בהצלחה.');
+      }
+      
+      document.getElementById('nextBtn').addEventListener('click', function () {
+        const select = document.getElementById('studentSelect');
+        const options = Array.from(select.options);
+        const currentIndex = options.findIndex(option => option.selected);
+        if (currentIndex < options.length - 1) {
+          select.selectedIndex = currentIndex + 1;
+          select.dispatchEvent(new Event('change'));
+        } else {
+          alert('אין תלמיד הבא.');
+        }
+      });
+      
+      document.getElementById('prevBtn').addEventListener('click', function () {
+        const select = document.getElementById('studentSelect');
+        const options = Array.from(select.options);
+        const currentIndex = options.findIndex(option => option.selected);
+        if (currentIndex > 1) {
+          select.selectedIndex = currentIndex - 1;
+          select.dispatchEvent(new Event('change'));
+        } else {
+          alert('אין תלמיד קודם.');
+        }
+      });
+      
+      document.getElementById('studentSelect').addEventListener('change', async function () {
+        const studentId = this.value;
+        if (!studentId) return;
+        // קריאה לטבלת "רשימת אברכים" לקבלת נתוני סטטיסטיקה
+        const studentRecord = await fetchStudentData(studentId);
+        if (studentRecord) {
+          const fields = studentRecord.fields;
+          const totalShaarei = Number(fields["מס' דפים שערי יצחק"] || 0);
+          const totalTorato = Number(fields["עבר"] || 0);
+          document.getElementById('shaareiValue').textContent = totalShaarei;
+          document.getElementById('toratoValue').textContent = totalTorato;
+        }
+        // קריאה לנתוני "שערי יצחק" ליצירת הטבלה המפורטת
+        const records = await fetchReportData(studentId);
+        renderReportTable(records);
+      });
+      
+      document.getElementById('saveAllBtn').addEventListener('click', async function () {
+        await updateRecords();
+      });
+      
+      // עדכון כפתור "עדכן מסכתות ופרקים" – מעביר לעמוד חדש ללא שליחת פרמטרים
+      document.getElementById('updateBtn').addEventListener('click', function () {
+        // עדכן כאן את כתובת הדף הרצויה
+        window.location.href = 'https://your-new-url.com';
+      });
+      
+      (async function init() {
+        await populateStudentDropdown();
+      })();
+      
+      // לוגיקת פתיחת וסגירת חלון הסינון
+      const filterBtn = document.getElementById('filterBtn');
+      const filterContainer = document.getElementById('filterContainer');
+      const closeFilterBox = document.getElementById('closeFilterBox');
+      
+      filterBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        console.log("Filter button clicked");
+        filterContainer.style.display = 'block';
+        const btnRect = filterBtn.getBoundingClientRect();
+        const filterBox = document.getElementById('filterBox');
+        const filterBoxHeight = filterBox.offsetHeight;
+        filterContainer.style.position = 'fixed';
+        filterContainer.style.top = (btnRect.top - filterBoxHeight) + 'px';
+        filterContainer.style.left = btnRect.left + 'px';
+        filterContainer.style.right = 'auto';
+      });
+      
+      closeFilterBox.addEventListener('click', (event) => {
+        event.stopPropagation();
+        console.log("Close filter clicked");
+        filterContainer.style.display = 'none';
+      });
+      
+      document.addEventListener('click', (event) => {
+        if (!filterContainer.contains(event.target) && !filterBtn.contains(event.target)) {
+          filterContainer.style.display = 'none';
+        }
+      });
+      
+      // פונקציה לעדכון כותרת הקבוצה – כאשר הסינון מופעל, החישובים עבור "שערי יצחק" ו"תורתו" יתעדכנו בהתאם לרשומות הנראות,
+      // אך הערך של סך הדפים יישאר סטטי מה-dataset.
+      function updateGroupHeader(headerRow, recordRows) {
+        if (recordRows.length === 0) {
+          headerRow.style.display = 'none';
+          return;
+        }
+        let sumChecked = 0;
+        let sumDone = 0;
+        recordRows.forEach(row => {
+          const pages = parseInt(row.cells[3].textContent) || 0;
+          const checkbox = row.cells[4].querySelector('input[type="checkbox"]');
+          if (checkbox && checkbox.checked) {
+            sumChecked += pages;
+          }
+          const selectTorato = row.cells[5].querySelector('select');
+          if (selectTorato && selectTorato.value === "עבר") {
+            sumDone += pages;
+          }
+        });
+        const totalPagesGroup = headerRow.dataset.totalPages;
+        const originalText = headerRow.cells[0].textContent.split(" (")[0];
+        headerRow.cells[0].textContent = originalText + " (" + totalPagesGroup + ")";
+        headerRow.cells[1].textContent = sumChecked;
+        headerRow.cells[2].textContent = sumDone;
+        headerRow.style.display = '';
+      }
+      
+      // פונקציה להחלת הסינון על הטבלה
+      function applyFilter() {
+        const filterShaarei = document.getElementById('filterShaarei').value;
+        const filterTorato = document.getElementById('filterTorato').value;
+        const tableContainer = document.getElementById('reportDataContainer');
+        const table = tableContainer.querySelector('table');
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.children);
+        let currentGroupHeader = null;
+        let groupRecordRows = [];
+        rows.forEach(row => {
+          // זיהוי שורת קיבוץ לפי קיום תא עם המחלקה 'group-header'
+          if (row.querySelector('td.group-header')) {
+            if (currentGroupHeader) {
+              updateGroupHeader(currentGroupHeader, groupRecordRows);
+            }
+            currentGroupHeader = row;
+            groupRecordRows = [];
+            row.style.display = '';
+          } else if (row.dataset.recordId) {
+            let showRow = true;
+            const checkbox = row.cells[4].querySelector('input[type="checkbox"]');
+            if (filterShaarei === 'checked' && (!checkbox || !checkbox.checked)) {
+              showRow = false;
+            } else if (filterShaarei === 'unchecked' && (checkbox && checkbox.checked)) {
+              showRow = false;
+            }
+            const selectTorato = row.cells[5].querySelector('select');
+            if (filterTorato && selectTorato.value !== filterTorato) {
+              showRow = false;
+            }
+            row.style.display = showRow ? '' : 'none';
+            if (showRow) {
+              groupRecordRows.push(row);
+            }
+          }
+        });
+        if (currentGroupHeader) {
+          updateGroupHeader(currentGroupHeader, groupRecordRows);
+        }
+        filterContainer.style.display = 'none';
+      }
+      
+      // פונקציה לניקוי הסינון והחזרת הטבלה למצב המקורי
+      function clearFilter() {
+        document.getElementById('filterShaarei').value = "";
+        document.getElementById('filterTorato').value = "";
+        const tableContainer = document.getElementById('reportDataContainer');
+        const table = tableContainer.querySelector('table');
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.children);
+        let currentGroupHeader = null;
+        let groupRecordRows = [];
+        rows.forEach(row => {
+          if (row.querySelector('td.group-header')) {
+            if (currentGroupHeader) {
+              updateGroupHeader(currentGroupHeader, groupRecordRows);
+            }
+            currentGroupHeader = row;
+            groupRecordRows = [];
+            row.style.display = '';
+          } else if (row.dataset.recordId) {
+            row.style.display = '';
+            groupRecordRows.push(row);
+          }
+        });
+        if (currentGroupHeader) {
+          updateGroupHeader(currentGroupHeader, groupRecordRows);
+        }
+        filterContainer.style.display = 'none';
+      }
+      
+      // מאזינים לכפתורי הסינון
+      document.getElementById('applyFilterBtn').addEventListener('click', function(event) {
+        event.stopPropagation();
+        applyFilter();
+      });
+      
+      document.getElementById('clearFilterBtn').addEventListener('click', function(event) {
+        event.stopPropagation();
+        clearFilter();
+      });
+      
+      // עדכון לוגיקת כפתור "חזרה לראש" – שימוש ב-window.scrollY כדי לבדוק את כמות הגלילה
+      const backToTopBtn = document.getElementById('backToTop');
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 200) {
+          backToTopBtn.style.display = 'flex';
+        } else {
+          backToTopBtn.style.display = 'none';
+        }
+      });
+      
+      backToTopBtn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    </script>
+  </body>
+</html>
