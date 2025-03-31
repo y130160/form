@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>דף נתונים - דו"ח כולל + מערכת שעות</title>
+  <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://y130160.github.io/form/לוגו בני ברק.png">
+  <style>
+    /* עיצוב בסיסי */
+    body {
+      font-family: 'Times New Roman', serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+      text-align: center;
+    }
+
+    /* כותרת דביקה */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      background-color: #f8f9fa;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      padding: 10px 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    img.logo {
+      width: 80px;
+      margin-bottom: 5px;
+    }
+    .top-header h2 {
+      margin: 5px 0;
+    }
+    
+    /* כפתור רענון ליד ה-H2 */
+    #refreshBtn {
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-size: 1.5em; /* טיפה גדול */
+      margin-right: 10px; /* מרווח מהטקסט */
+      position: absolute;
+      left: 20%; /* מיקום בצד שמאל */
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* חלון פופאפ להמתנה */
+    #popupWait {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 99999;
+      background-color: #fff;
+      border: 2px solid #b8860b;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      max-width: 300px;
+      text-align: center;
+      font-family: 'Times New Roman', serif;
+    }
+    
+    /* שורת בחירת תלמיד והכפתורים */
+    .student-nav {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 10px auto;
+      max-width: 600px;
+    }
+    .student-nav button {
+      font-size: 1.1em;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 50px;
+      background-color: #b8860b;
+      color: #fff;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #studentSelect {
+      width: 100%;
+      max-width: 300px;
+      padding: 5px;
+      height: 40px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+
+    /* אזור התוכן המרכזי */
+    .content-area {
+      width: 90%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding-bottom: 50px;
+    }
+
+    /* סטטיסטיקות */
+    .stats-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 10px auto 20px auto;
+      max-width: 600px;
+    }
+    .stat-box {
+      border: 2px solid #b8860b;
+      border-radius: 8px;
+      padding: 3px;
+      width: 120px;
+      text-align: center;
+      background-color: #fff;
+    }
+    .stat-title {
+      font-weight: bold;
+      font-size: 1.3em;
+      margin-bottom: 5px;
+    }
+    .stat-value {
+      font-size: 1.5em;
+      color: #b8860b;
+    }
+
+    /* טבלאות דו"ח */
+    .table-container {
+      position: relative;
+      max-width: 750px;
+      margin: 0 auto;
+    }
+    .table-container table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    thead {
+      background-color: #007bff;
+      color: #fff;
+      position: sticky;
+      top: 55px;
+      z-index: 2;
+    }
+    th, td {
+      padding: 3px;
+      border: 1px solid #ddd;
+      text-align: center;
+      white-space: normal;
+      word-wrap: break-word;
+      overflow: visible;
+    }
+    tbody tr:nth-child(odd) {
+      background-color: #f2f2f2;
+    }
+    tbody tr:hover {
+      background-color: #e9ecef;
+    }
+    .group-header {
+      background-color: #ddd;
+      font-weight: bold;
+      text-align: center;
+    }
+    .editable {
+      width: 100%;
+      min-height: 30px;
+      padding: 3px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      white-space: normal;
+      word-wrap: break-word;
+      overflow: visible;
+    }
+    select {
+      width: 100%;
+      padding: 3px;
+      box-sizing: border-box;
+    }
+
+    /* כפתורי פעולה */
+    #saveAllBtn, #saveAllBtn2 {
+      background-color: #b8860b;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      position: fixed;
+      bottom: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30%;
+      z-index: 2000;
+    }
+    .deleteBtn {
+      background-color: #dc3545;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 6px 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* חלונית הסינון */
+    #filterContainer {
+      display: none;
+      position: fixed;
+      top: 200px;
+      right: 20px;
+      z-index: 9999;
+    }
+    #filterBox {
+      background: linear-gradient(120deg, #fff3e0, #fff);
+      border: 2px solid #b8860b;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      width: 180px;
+      text-align: right;
+      position: relative;
+      font-family: 'Times New Roman', serif;
+    }
+    #closeFilterBox {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #b8860b;
+      transition: transform 0.2s;
+    }
+    #closeFilterBox:hover {
+      transform: scale(1.1);
+    }
+    .filter-buttons {
+      text-align: center;
+      margin-top: 10px;
+    }
+    #filterBox button {
+      background-color: #b8860b;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 4px;
+      font-size: 0.9em;
+    }
+    #filterBox button:hover {
+      background-color: #a6780a;
+    }
+
+    /* כפתור חזרה לראש */
+    #backToTop {
+      position: fixed;
+      bottom: 20px;
+      right: 20%;
+      width: 50px;
+      height: 50px;
+      border: 2px solid #FFD700;
+      background-color: #fff;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 3000;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    /* כפתור "חזרה לטבלה הראשונה" בטבלה השנייה */
+    #backToTable1 {
+      background-color: #b8860b;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      position: absolute;
+      top: -430px;
+      left: 20px;
+      z-index: 1000;
+    }
+
+    /* כפתור חדש למעבר לטבלה השנייה */
+    #topTransitionBtn {
+      background-color: #b8860b;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 12px 20px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      position: absolute;
+      top: -430px;
+      left: 10px;
+      z-index: 1000;
+    }
+
+    /* טבלת מערכת שעות – עיצוב ייעודי */
+    .schedule-table-container {
+      margin: 20px auto;
+      display: block;
+      text-align: center;
+    }
+    .schedule-table-container table {
+      display: inline-table;
+      margin: 0 auto;
+      table-layout: auto;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .schedule-table-container thead {
+      background-color: #007bff;
+      color: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .schedule-table-container th, .schedule-table-container td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .schedule-table-container .header-span {
+      background-color: #0056b3;
+      font-weight: bold;
+    }
+    .schedule-table-container tbody tr:nth-child(odd) {
+      background-color: #f2f2f2;
+    }
+    .schedule-table-container tbody tr:hover {
+      background-color: #e9ecef;
+    }
+
+    /* קונטיינר חדש עבור מערכת השעות – מתפרש על כל הדף */
+    #fullWidthSchedule {
+      display: none;
+      width: 100%;
+      margin: 0 auto;
+      padding: 10px 0 10px;
+      text-align: center;
+      background-color: #f8f9fa;
+    }
+    
+    /* אזור תיבת הטקסט של "מחפש שותף" – מתווסף מתחת למערכת השעות */
+    #partnerContainer {
+      margin-top: 20px;
+      text-align: center;
+      padding-bottom: 50px;
+    }
+    #partnerContainer label {
+      font-size: 1.1em;
+      margin-right: 10px;
+    }
+    #partnerField {
+      width: 80%;
+      padding: 8px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <!-- לוגו וכותרת (גוללים יחד עם הדף) -->
+  <img class="logo" src="https://y130160.github.io/form/לוגו בני ברק.png" alt="לוגו">
+  
+  <!-- חלונית מודאל להמתנה 20 שניות עם טיימר -->
+  <div id="popupWait">
+    <p>השינויים נשמרו. אנא המתן <span id="timerCountdown">20</span> שניות למעבר לטבלה השנייה...</p>
+  </div>
+  
+  <h1>מסכתות ופרקים</h1>
+  <div class="top-header">
+    <h2 id="pageHeader">נתונים</h2>
+    <!-- כפתור רענון (אימוג'י) משמאל -->
+    <button id="refreshBtn" title="רענן נתונים">🔄</button>
+  </div>
+  
+  <!-- שורת בחירת תלמיד והכפתורים -->
+  <div class="student-nav">
+    <button id="prevBtn">תלמיד הקודם</button>
+    <select id="studentSelect">
+      <option value="" selected disabled>בחר תלמיד</option>
+    </select>
+    <button id="nextBtn">תלמיד הבא</button>
+  </div>
+  
+  <!-- אזור התוכן המרכזי (דו"ח) -->
+  <div class="content-area">
+    <!-- סטטיסטיקות -->
+    <div class="stats-container">
+      <div class="stat-box">
+        <div class="stat-title">שערי יצחק</div>
+        <div id="shaareiValue" class="stat-value">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">תורתו</div>
+        <div id="toratoValue" class="stat-value">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">הפער</div>
+        <div id="aparValue" class="stat-value">0</div>
+      </div>
+    </div>
+  
+    <!-- כפתור הפילטר -->
+    <div style="margin:10px; display:flex; justify-content:center;">
+      <button id="filterBtn" style="background:none; border:none; cursor:pointer;" title="פילטר">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24">
+          <rect width="24" height="24" fill="none" />
+          <path fill="#b8860b" d="M21 3H3v2l8 8v6l2 2v-8l8-8V3z"/>
+        </svg>
+      </button>
+    </div>
+  
+    <!-- טבלה ראשונה: "שערי יצחק" -->
+    <div id="table1Container" style="position:relative;">
+      <button id="topTransitionBtn">מעבר לטבלה השנייה</button>
+  
+      <div id="filterContainer">
+        <div id="filterBox">
+          <span id="closeFilterBox">X</span>
+          <h4 style="text-align: center">סינון</h4>
+          <label>שערי יצחק:</label>
+          <select id="filterShaarei">
+            <option value="">(הצג הכל)</option>
+            <option value="checked">מסומן ✔️</option>
+            <option value="unchecked">לא מסומן ❌</option>
+          </select>
+          <br>
+          <label>תורתו:</label>
+          <select id="filterTorato">
+            <option value="">(הצג הכל)</option>
+            <option value="הזמין">הזמין</option>
+            <option value="בוצע">בוצע</option>
+            <option value="עבר">עבר</option>
+            <option value="לא עבר">לא עבר</option>
+            <option value="לא בוצע">לא בוצע</option>
+          </select>
+          <div class="filter-buttons">
+            <button id="applyFilterBtn">החל</button>
+            <button id="clearFilterBtn">נקה</button>
+          </div>
+        </div>
+      </div>
+  
+      <div class="table-container">
+        <div id="reportDataContainer"></div>
+      </div>
+      <button id="saveAllBtn" style="display:none;">שמירה ומעבר לטבלה השנייה</button>
+    </div>
+  
+    <!-- טבלה שנייה: "הכנה לדוח" -->
+    <div id="table2Container" style="display:none; position:relative; min-height:400px;">
+      <button id="backToTable1">חזרה לטבלה הראשונה</button>
+      <div class="table-container">
+        <div id="reportDataContainer2"></div>
+      </div>
+      <button id="saveAllBtn2" style="display:none;">שמירה</button>
+    </div>
+  </div>
+  
+  <!-- קונטיינר חדש עבור מערכת השעות, מחוץ לאזור הדו"ח -->
+  <div id="fullWidthSchedule">
+    <h2>מערכת שעות</h2>
+    <div id="scheduleSection">
+      <div class="schedule-table-container" id="scheduleMorningContainer">
+        <!-- טבלת בוקר תיבנה כאן -->
+      </div>
+      <div class="schedule-table-container" id="scheduleAfternoonContainer">
+        <!-- טבלת אחר הצהריים תיבנה כאן -->
+      </div>
+    </div>
+    <!-- אזור לתיבת הטקסט "מחפש שותף" (ללא כפתור שמירה נפרד) -->
+    <div id="partnerContainer">
+      <label for="partnerField">מחפש שותף:</label>
+      <input type="text" id="partnerField" placeholder="הזן שותף" />
+    </div>
+  </div>
+  
+  <!-- כפתור חזרה לראש -->
+  <button id="backToTop" title="חזרה לראש הדף">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#FFD700" viewBox="0 0 24 24">
+      <path d="M12 4l-8 8h5v8h6v-8h5z"/>
+    </svg>
+  </button>
+  
+<script>
+  // הגדרות API
+  const AIRTABLE_API_KEY = 'patbiEZcpMDqQ8MTk.e891c6721030064a2dc13028d2008d46048ea912502cfdec2fa2ca18460ca749';
+  const AIRTABLE_BASE_ID = 'appanZGbMogA0mxRl';
+  const STUDENTS_TABLE = 'רשימת אברכים';
+  const NEW_TABLE = 'שערי יצחק';
+  const REPORT_TABLE = 'הכנה לדוח';
+  const SCHEDULE_TABLE = 'מערכת שעות';
+  const תורתוOptions = ["הזמין", "בוצע", "עבר", "לא עבר", "לא בוצע"];
+  const סוגOptions = ['שערי יצחק', 'תורתו'];
+  const עדכוןOptions = ['אין שינוי ✅', 'נא לעדכן ❌', 'חדש'];
+  
+  const headers = {
+    'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
+    'Content-Type': 'application/json'
+  };
+  
+  // פונקציות טעינת נתונים
+  async function fetchAllRecords(tableName, queryParams = "") {
+    let allRecords = [];
+    let offset = "";
+    do {
+      let url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(tableName)}?${queryParams}`;
+      if (offset) { url += `&offset=${offset}`; }
+      const response = await fetch(url, { headers: { Authorization: `Bearer ${AIRTABLE_API_KEY}` } });
+      const data = await response.json();
+      if (data.records) { allRecords = allRecords.concat(data.records); }
+      offset = data.offset;
+    } while (offset);
+    return allRecords;
+  }
+  
+  async function fetchStudents() {
+    const query = `sort[0][field]=משפחה ופרטי`;
+    return await fetchAllRecords(STUDENTS_TABLE, query);
+  }
+  
+  async function populateStudentDropdown() {
+    const select = document.getElementById('studentSelect');
+    const students = await fetchStudents();
+    students.forEach(record => {
+      const option = document.createElement('option');
+      option.value = record.id;
+      option.textContent = record.fields["משפחה ופרטי"] || 'ללא שם';
+      select.appendChild(option);
+    });
+  }
+  
+  async function fetchStudentData(studentId) {
+    const query = `filterByFormula=RECORD_ID()="${studentId}"`;
+    const records = await fetchAllRecords(STUDENTS_TABLE, query);
+    return records.length > 0 ? records[0] : null;
+  }
+  
+  // עדכון שדה "מחפש שותף" בטבלת "רשימת אברכים"
+  async function updatePartnerField() {
+    const studentId = document.getElementById('studentSelect').value;
+    if (!studentId) {
+      alert("אנא בחר תלמיד תחילה.");
+      return;
+    }
+    const newPartner = document.getElementById('partnerField').value.trim();
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(STUDENTS_TABLE)}/${studentId}`;
+    try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: headers,
+        body: JSON.stringify({ fields: { "מחפש שותף": newPartner } })
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
+      }
+      const data = await response.json();
+      console.log("מחפש שותף עודכן:", data);
+    } catch (error) {
+      console.error("Error updating partner field:", error);
+      alert("אירעה שגיאה בעדכון שותף.");
+    }
+  }
+  
+  // דו"ח - טבלה ראשונה
+  async function fetchReportData(studentId) {
+    const formula = encodeURIComponent(`IF(FIND("${studentId}", ARRAYJOIN({IDתלמיד})), TRUE(), FALSE())`);
+    const sortParams = `sort[0][field]=${encodeURIComponent("מס' מסכת")}&sort[0][direction]=asc&sort[1][field]=${encodeURIComponent("מס' פרק")}&sort[1][direction]=asc`;
+    const query = `filterByFormula=${formula}&${sortParams}`;
+    const records = await fetchAllRecords(NEW_TABLE, query);
+    console.log('Fetched report data (שערי יצחק):', records);
+    return records;
+  }
+  
+  function renderReportTable(records) {
+    const container = document.getElementById('reportDataContainer');
+    container.innerHTML = '';
+    if (records.length === 0) {
+      container.textContent = 'אין נתונים להצגה.';
+      document.getElementById('saveAllBtn').style.display = 'none';
+      return;
+    }
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const headersArray = ['פרק', 'מדף', 'עד דף', 'מס\' דפים', 'שערי יצחק', 'תורתו'];
+    headersArray.forEach(text => {
+      const th = document.createElement('th');
+      th.textContent = text;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    const groups = [];
+    let currentGroupName = null;
+    let currentGroupObj = null;
+    records.forEach(record => {
+      const groupValue = record.fields["מסכתות"] || "";
+      if (groupValue !== currentGroupName) {
+        currentGroupName = groupValue;
+        currentGroupObj = { groupName: groupValue, records: [] };
+        groups.push(currentGroupObj);
+      }
+      currentGroupObj.records.push(record);
+    });
+    groups.forEach(group => {
+      let totalPagesGroup = 0;
+      let sumChecked = 0;
+      let sumDone = 0;
+      group.records.forEach(r => {
+        const fields = r.fields;
+        const pages = parseInt(fields["מס' דפים"] || 0, 10);
+        totalPagesGroup += pages;
+        if (fields["שערי יצחק"]) { sumChecked += pages; }
+        if (fields["תורתו"] === "עבר") { sumDone += pages; }
+      });
+      const groupRow = document.createElement('tr');
+      groupRow.classList.add('group-header-row');
+      const groupNameCell = document.createElement('td');
+      groupNameCell.colSpan = 4;
+      groupNameCell.textContent = group.groupName + " (" + totalPagesGroup + ")";
+      groupNameCell.className = 'group-header';
+      groupRow.appendChild(groupNameCell);
+      const sumCheckedCell = document.createElement('td');
+      sumCheckedCell.className = 'group-header';
+      const groupCheckbox = document.createElement('input');
+      groupCheckbox.type = 'checkbox';
+      groupCheckbox.style.marginRight = '5px';
+      sumCheckedCell.appendChild(groupCheckbox);
+      sumCheckedCell.appendChild(document.createTextNode(sumChecked));
+      groupRow.appendChild(sumCheckedCell);
+      const sumDoneCell = document.createElement('td');
+      sumDoneCell.className = 'group-header';
+      sumDoneCell.textContent = sumDone;
+      groupRow.appendChild(sumDoneCell);
+      groupRow.dataset.totalPages = totalPagesGroup;
+      tbody.appendChild(groupRow);
+      groupCheckbox.addEventListener('change', function() {
+        let nextRow = groupRow.nextElementSibling;
+        while (nextRow && !nextRow.classList.contains('group-header-row')) {
+          if (nextRow.dataset.recordId) {
+            const detailCheckbox = nextRow.cells[4].querySelector('input[type="checkbox"]');
+            if (detailCheckbox) {
+              detailCheckbox.checked = groupCheckbox.checked;
+            }
+          }
+          nextRow = nextRow.nextElementSibling;
+        }
+      });
+      group.records.forEach(record => {
+        const fields = record.fields;
+        const tr = document.createElement('tr');
+        tr.dataset.recordId = record.id;
+        tr.dataset.originalShaarei = fields['שערי יצחק'] ? 'true' : 'false';
+        tr.dataset.originalTorato = fields['תורתו'] || '';
+        const cell0 = document.createElement('td');
+        cell0.textContent = fields['פרק 2'] || '';
+        tr.appendChild(cell0);
+        const cell1 = document.createElement('td');
+        cell1.textContent = fields['מדף'] || '';
+        tr.appendChild(cell1);
+        const cell2 = document.createElement('td');
+        cell2.textContent = fields['עד דף'] || '';
+        tr.appendChild(cell2);
+        const cell3 = document.createElement('td');
+        cell3.textContent = fields['מס\' דפים'] || '';
+        tr.appendChild(cell3);
+        const cell4 = document.createElement('td');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = fields['שערי יצחק'] || false;
+        cell4.appendChild(checkbox);
+        tr.appendChild(cell4);
+        const cell5 = document.createElement('td');
+        const selectTorato = document.createElement('select');
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'בחר תורתו';
+        defaultOption.selected = true;
+        defaultOption.disabled = true;
+        selectTorato.appendChild(defaultOption);
+        תורתוOptions.forEach(opt => {
+          const option = document.createElement('option');
+          option.value = opt;
+          option.textContent = opt;
+          if (opt === fields['תורתו']) option.selected = true;
+          selectTorato.appendChild(option);
+        });
+        cell5.appendChild(selectTorato);
+        tr.appendChild(cell5);
+        tbody.appendChild(tr);
+      });
+    });
+    table.appendChild(tbody);
+    const containerElement = document.getElementById('reportDataContainer');
+    containerElement.innerHTML = "";
+    containerElement.appendChild(table);
+    document.getElementById('saveAllBtn').style.display = 'block';
+  }
+  
+  async function updateRecords() {
+    const tableRows = document.querySelectorAll('#reportDataContainer tbody tr');
+    if (tableRows.length === 0) return;
+    const recordsToUpdate = [];
+    tableRows.forEach(tr => {
+      if (!tr.dataset.recordId) return;
+      const originalShaarei = (tr.dataset.originalShaarei === 'true');
+      const originalTorato = tr.dataset.originalTorato;
+      const checkbox = tr.cells[4].querySelector('input[type="checkbox"]');
+      const newShaarei = checkbox && checkbox.checked;
+      const selectTorato = tr.cells[5].querySelector('select');
+      const newTorato = selectTorato ? selectTorato.value.trim() : '';
+      const shaareiChanged = (newShaarei !== originalShaarei);
+      const toratoChanged = (newTorato !== originalTorato);
+      if (shaareiChanged || toratoChanged) {
+        const updatedFields = {};
+        if (shaareiChanged) {
+          updatedFields['שערי יצחק'] = newShaarei;
+        }
+        if (toratoChanged && newTorato !== "") {
+          updatedFields['תורתו'] = newTorato;
+        } else if (toratoChanged && newTorato === "") {
+          updatedFields['תורתו'] = "";
+        }
+        recordsToUpdate.push({ id: tr.dataset.recordId, fields: updatedFields });
+      }
+    });
+    if (recordsToUpdate.length === 0) {
+      console.log("No changes detected, skipping update.");
+      return;
+    }
+    console.log("Records to update (שערי יצחק):", recordsToUpdate);
+    for (let i = 0; i < recordsToUpdate.length; i += 10) {
+      const batch = recordsToUpdate.slice(i, i + 10);
+      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(NEW_TABLE)}`;
+      try {
+        const response = await fetch(url, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${AIRTABLE_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ records: batch })
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
+        }
+        const data = await response.json();
+        console.log('Updated batch (שערי יצחק):', data);
+      } catch (error) {
+        console.error('Error updating records:', error);
+        alert('אירעה שגיאה בעדכון הרשומות.');
+        return;
+      }
+    }
+    alert('הרשומות עודכנו בהצלחה.');
+  }
+  
+  async function fetchReportData2(studentId) {
+    const formula = encodeURIComponent(`IF(FIND("${studentId}", ARRAYJOIN({IDתלמיד})), TRUE(), FALSE())`);
+    const sortParams = `&sort[0][field]=${encodeURIComponent("מס' מסכת")}&sort[0][direction]=asc&sort[1][field]=${encodeURIComponent("סוג")}&sort[1][direction]=asc`;
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(REPORT_TABLE)}?filterByFormula=${formula}${sortParams}`;
+    try {
+      const response = await fetch(url, { headers });
+      const data = await response.json();
+      console.log('Fetched report data (הכנה לדוח):', data.records);
+      return data.records;
+    } catch (error) {
+      console.error('Error fetching report data:', error);
+      return [];
+    }
+  }
+  
+  function renderReportTable2(records) {
+    const container = document.getElementById('reportDataContainer2');
+    container.innerHTML = '';
+    if (records.length === 0) {
+      container.textContent = 'אין נתונים להצגה.';
+      document.getElementById('saveAllBtn2').style.display = 'none';
+      return;
+    }
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const headersArray = ['מסכתות ופרקים', 'סוג', 'שותף', 'עידכון', 'הערות', 'פעולות'];
+    headersArray.forEach(text => {
+      const th = document.createElement('th');
+      th.textContent = text;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    const tbody = document.createElement('tbody');
+    records.forEach(record => {
+      const tr = document.createElement('tr');
+      tr.dataset.recordId = record.id;
+      const fields = record.fields;
+      tr.dataset.origMasechtot = fields['מסכתות ופרקים'] || '';
+      tr.dataset.origSug = fields['סוג'] || '';
+      tr.dataset.origShutaf = fields['שותף'] || '';
+      tr.dataset.origIdkun = fields['עידכון'] || '';
+      tr.dataset.origHeaarot = fields['הערות'] || '';
+      const cell1 = document.createElement('td');
+      const editable1 = document.createElement('div');
+      editable1.className = 'editable';
+      editable1.contentEditable = true;
+      editable1.textContent = fields['מסכתות ופרקים'] || '';
+      cell1.appendChild(editable1);
+      tr.appendChild(cell1);
+      const cell2 = document.createElement('td');
+      const select2 = document.createElement('select');
+      const defaultOption2 = document.createElement('option');
+      defaultOption2.value = '';
+      defaultOption2.textContent = 'בחר סוג';
+      select2.appendChild(defaultOption2);
+      const currentType = fields['סוג'] || '';
+      סוגOptions.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = opt;
+        if(opt === currentType) option.selected = true;
+        select2.appendChild(option);
+      });
+      cell2.appendChild(select2);
+      tr.appendChild(cell2);
+      const cell3 = document.createElement('td');
+      const editable3 = document.createElement('div');
+      editable3.className = 'editable';
+      editable3.contentEditable = true;
+      editable3.textContent = fields['שותף'] || '';
+      cell3.appendChild(editable3);
+      tr.appendChild(cell3);
+      const cell4 = document.createElement('td');
+      const select4 = document.createElement('select');
+      const defaultOption4 = document.createElement('option');
+      defaultOption4.value = '';
+      defaultOption4.textContent = 'בחר עידכון';
+      select4.appendChild(defaultOption4);
+      const currentUpdate = fields['עידכון'] || '';
+      עדכוןOptions.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = opt;
+        if(opt === currentUpdate) option.selected = true;
+        select4.appendChild(option);
+      });
+      cell4.appendChild(select4);
+      tr.appendChild(cell4);
+      const cell5 = document.createElement('td');
+      const editable5 = document.createElement('div');
+      editable5.className = 'editable';
+      editable5.contentEditable = true;
+      editable5.textContent = fields['הערות'] || '';
+      cell5.appendChild(editable5);
+      tr.appendChild(cell5);
+      const cellActions = document.createElement('td');
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'מחק';
+      deleteBtn.className = 'deleteBtn';
+      deleteBtn.addEventListener('click', async () => {
+        if(confirm('האם אתה בטוח שברצונך למחוק רשומה זו?')) {
+          await deleteRecord2(record.id);
+          tr.remove();
+        }
+      });
+      cellActions.appendChild(deleteBtn);
+      tr.appendChild(cellActions);
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    const container2 = document.getElementById('reportDataContainer2');
+    container2.innerHTML = "";
+    container2.appendChild(table);
+    document.getElementById('saveAllBtn2').style.display = 'block';
+  }
+  
+  async function updateRecords2() {
+    const tableRows = document.querySelectorAll('#reportDataContainer2 tbody tr');
+    if(tableRows.length === 0) return;
+    const recordsToUpdate = [];
+    tableRows.forEach(tr => {
+      const recordId = tr.dataset.recordId;
+      if(!recordId) return;
+      const origMasechtot = tr.dataset.origMasechtot;
+      const origSug = tr.dataset.origSug;
+      const origShutaf = tr.dataset.origShutaf;
+      const origIdkun = tr.dataset.origIdkun;
+      const origHeaarot = tr.dataset.origHeaarot;
+      const newMasechtot = tr.cells[0].querySelector('.editable').textContent.trim();
+      const newSug = tr.cells[1].querySelector('select').value;
+      const newShutaf = tr.cells[2].querySelector('.editable').textContent.trim();
+      const newIdkun = tr.cells[3].querySelector('select').value;
+      const newHeaarot = tr.cells[4].querySelector('.editable').textContent.trim();
+      const masechtotChanged = (newMasechtot !== origMasechtot);
+      const sugChanged = (newSug !== origSug);
+      const shutafChanged = (newShutaf !== origShutaf);
+      const idkunChanged = (newIdkun !== origIdkun);
+      const heaarotChanged = (newHeaarot !== origHeaarot);
+      if (masechtotChanged || sugChanged || shutafChanged || idkunChanged || heaarotChanged) {
+        const updatedFields = {};
+        if (masechtotChanged) updatedFields['מסכתות ופרקים'] = newMasechtot;
+        if (sugChanged) updatedFields['סוג'] = newSug;
+        if (shutafChanged) updatedFields['שותף'] = newShutaf;
+        if (idkunChanged) updatedFields['עידכון'] = newIdkun;
+        if (heaarotChanged) updatedFields['הערות'] = newHeaarot;
+        recordsToUpdate.push({ id: recordId, fields: updatedFields });
+      }
+    });
+    if (recordsToUpdate.length === 0) {
+      console.log("No changes detected in table 2, skipping update.");
+      return;
+    }
+    console.log("Records to update (הכנה לדוח):", recordsToUpdate);
+    for(let i = 0; i < recordsToUpdate.length; i += 10) {
+      const batch = recordsToUpdate.slice(i, i + 10);
+      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(REPORT_TABLE)}`;
+      try {
+        const response = await fetch(url, {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify({ records: batch })
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
+        }
+        const data = await response.json();
+        console.log('Updated batch (הכנה לדוח):', data);
+      } catch (error) {
+        console.error('Error updating records (הכנה לדוח):', error);
+        alert('אירעה שגיאה בעדכון הרשומות.');
+        return;
+      }
+    }
+    alert('הרשומות עודכנו בהצלחה.');
+  }
+  
+  async function deleteRecord2(recordId) {
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(REPORT_TABLE)}/${recordId}`;
+    try {
+      const response = await fetch(url, { method: 'DELETE', headers });
+      const data = await response.json();
+      console.log('Deleted record:', data);
+    } catch (error) {
+      console.error('Error deleting record:', error);
+      alert('אירעה שגיאה במחיקת הרשומה.');
+    }
+  }
+  
+  /* פונקציות הסינון */
+  function applyFilter() {
+    const filterShaarei = document.getElementById('filterShaarei').value.trim();
+    const filterTorato = document.getElementById('filterTorato').value.trim();
+    console.log("Applying filter:", { filterShaarei, filterTorato });
+    const container = document.getElementById('reportDataContainer');
+    const table = container.querySelector('table');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.children);
+    let currentGroupHeader = null;
+    let groupRecordRows = [];
+    rows.forEach(row => {
+      if (row.querySelector('td.group-header')) {
+        if (currentGroupHeader) {
+          updateGroupHeader(currentGroupHeader, groupRecordRows);
+        }
+        currentGroupHeader = row;
+        groupRecordRows = [];
+        row.style.display = '';
+      } else if (row.dataset.recordId) {
+        let showRow = true;
+        const checkbox = row.cells[4].querySelector('input[type="checkbox"]');
+        if (filterShaarei === 'checked' && (!checkbox || !checkbox.checked)) {
+          showRow = false;
+        } else if (filterShaarei === 'unchecked' && (checkbox && checkbox.checked)) {
+          showRow = false;
+        }
+        const selectTorato = row.cells[5].querySelector('select');
+        if (filterTorato !== "" && selectTorato.value.trim() !== filterTorato) {
+          showRow = false;
+        }
+        row.style.display = showRow ? '' : 'none';
+        if (showRow) {
+          groupRecordRows.push(row);
+        }
+      }
+    });
+    if (currentGroupHeader) {
+      updateGroupHeader(currentGroupHeader, groupRecordRows);
+    }
+    document.getElementById('filterContainer').style.display = 'none';
+  }
+  
+  function clearFilter() {
+    document.getElementById('filterShaarei').value = "";
+    document.getElementById('filterTorato').value = "";
+    const container = document.getElementById('reportDataContainer');
+    const table = container.querySelector('table');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.children);
+    let currentGroupHeader = null;
+    let groupRecordRows = [];
+    rows.forEach(row => {
+      if (row.querySelector('td.group-header')) {
+        if (currentGroupHeader) {
+          updateGroupHeader(currentGroupHeader, groupRecordRows);
+        }
+        currentGroupHeader = row;
+        groupRecordRows = [];
+        row.style.display = '';
+      } else if (row.dataset.recordId) {
+        row.style.display = '';
+        groupRecordRows.push(row);
+      }
+    });
+    if (currentGroupHeader) {
+      updateGroupHeader(currentGroupHeader, groupRecordRows);
+    }
+    document.getElementById('filterContainer').style.display = 'none';
+  }
+  
+  function updateGroupHeader(headerRow, recordRows) {
+    if (recordRows.length === 0) {
+      headerRow.style.display = 'none';
+      return;
+    }
+    let sumChecked = 0;
+    let sumDone = 0;
+    recordRows.forEach(row => {
+      const pages = parseInt(row.cells[3].textContent) || 0;
+      const checkbox = row.cells[4].querySelector('input[type="checkbox"]');
+      if (checkbox && checkbox.checked) {
+        sumChecked += pages;
+      }
+      const selectTorato = row.cells[5].querySelector('select');
+      if (selectTorato && selectTorato.value === "עבר") {
+        sumDone += pages;
+      }
+    });
+    const totalPagesGroup = headerRow.dataset.totalPages;
+    const groupNameCell = headerRow.cells[0];
+    const originalText = groupNameCell.textContent.split(" (")[0];
+    groupNameCell.textContent = originalText + " (" + totalPagesGroup + ")";
+    const sumCheckedCell = headerRow.cells[1];
+    let groupCheckbox = sumCheckedCell.querySelector('input[type="checkbox"]');
+    if (!groupCheckbox) {
+      groupCheckbox = document.createElement('input');
+      groupCheckbox.type = 'checkbox';
+      groupCheckbox.style.marginRight = '5px';
+    }
+    sumCheckedCell.innerHTML = "";
+    sumCheckedCell.appendChild(groupCheckbox);
+    sumCheckedCell.appendChild(document.createTextNode(sumChecked));
+    const sumDoneCell = headerRow.cells[2];
+    sumDoneCell.textContent = sumDone;
+    headerRow.style.display = '';
+  }
+  
+  /* פונקציות לטבלת מערכת השעות */
+  const morningFields = [
+    "09:15", "09:30", "09:45", "10:00", "10:15", "10:30",
+    "10:45", "11:00", "11:15", "11:30", "11:45", "12:00",
+    "12:15", "12:30", "12:45", "13:00", "13:15", "13:30"
+  ];
+  const afternoonFields = [
+    "15:15", "15:30", "15:45", "16:00", "16:15", "16:30",
+    "16:45", "17:00", "17:15", "17:30", "17:45", "18:00",
+    "18:15", "18:30"
+  ];
+  
+  async function fetchScheduleData(studentId) {
+    const formula = encodeURIComponent(`IF(FIND("${studentId}", ARRAYJOIN({IDתלמיד})), TRUE(), FALSE())`);
+    const query = `filterByFormula=${formula}`;
+    try {
+      const records = await fetchAllRecords(SCHEDULE_TABLE, query);
+      console.log('Fetched schedule data:', records);
+      return records;
+    } catch (error) {
+      console.error('Error fetching schedule data:', error);
+      return [];
+    }
+  }
+  
+  function renderScheduleTable(records) {
+    const scheduleSection = document.getElementById('scheduleSection');
+    if (!records || records.length === 0) {
+      scheduleSection.innerHTML = 'אין נתונים במערכת שעות להצגה.';
+      scheduleSection.style.display = 'block';
+      return;
+    }
+    const record = records[0];
+    const fields = record.fields;
+    
+    // טבלת בוקר
+    let morningHTML = '<table>';
+    morningHTML += '<thead>';
+    morningHTML += `<tr><th class="header-span" colspan="${morningFields.length}">הבוקר</th></tr>`;
+    morningHTML += '<tr>';
+    morningFields.forEach(field => {
+      morningHTML += `<th>${field}</th>`;
+    });
+    morningHTML += '</tr>';
+    morningHTML += '</thead>';
+    morningHTML += '<tbody><tr>';
+    morningFields.forEach(field => {
+      const value = fields[field] || "";
+      morningHTML += `<td contenteditable="true" class="editable-schedule" data-original="${value}">${value}</td>`;
+    });
+    morningHTML += '</tr></tbody></table>';
+    
+    // טבלת אחר הצהריים
+    let afternoonHTML = '<table>';
+    afternoonHTML += '<thead>';
+    afternoonHTML += `<tr><th class="header-span" colspan="${afternoonFields.length}">אחר הצהריים</th></tr>`;
+    afternoonHTML += '<tr>';
+    afternoonFields.forEach(field => {
+      afternoonHTML += `<th>${field}</th>`;
+    });
+    afternoonHTML += '</tr>';
+    afternoonHTML += '</thead>';
+    afternoonHTML += '<tbody><tr>';
+    afternoonFields.forEach(field => {
+      const value = fields[field] || "";
+      afternoonHTML += `<td contenteditable="true" class="editable-schedule" data-original="${value}">${value}</td>`;
+    });
+    afternoonHTML += '</tr></tbody></table>';
+    
+    document.getElementById('scheduleMorningContainer').innerHTML = morningHTML;
+    document.getElementById('scheduleAfternoonContainer').innerHTML = afternoonHTML;
+    scheduleSection.style.display = 'block';
+  }
+  
+  async function updateScheduleData() {
+    const morningRow = document.querySelector('#scheduleMorningContainer table tbody tr');
+    const afternoonRow = document.querySelector('#scheduleAfternoonContainer table tbody tr');
+    const newMorning = {};
+    morningFields.forEach((field, index) => {
+      const cell = morningRow.cells[index];
+      const original = cell.getAttribute('data-original') || "";
+      const current = cell.textContent.trim();
+      if (current !== original) {
+        newMorning[field] = current;
+      }
+    });
+    const newAfternoon = {};
+    afternoonFields.forEach((field, index) => {
+      const cell = afternoonRow.cells[index];
+      const original = cell.getAttribute('data-original') || "";
+      const current = cell.textContent.trim();
+      if (current !== original) {
+        newAfternoon[field] = current;
+      }
+    });
+    const updatedFields = { ...newMorning, ...newAfternoon };
+    if (Object.keys(updatedFields).length === 0) {
+      console.log("No changes detected in schedule, skipping update.");
+      return;
+    }
+    const studentId = document.getElementById('studentSelect').value;
+    const scheduleRecords = await fetchScheduleData(studentId);
+    if (!scheduleRecords || scheduleRecords.length === 0) {
+      alert("לא נמצאה רשומת מערכת שעות לעדכון.");
+      return;
+    }
+    const recordId = scheduleRecords[0].id;
+    const url = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(SCHEDULE_TABLE)}/${recordId}`;
+    try {
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ fields: updatedFields })
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
+      }
+      const data = await response.json();
+      console.log("Updated schedule record:", data);
+    } catch (error) {
+      console.error("Error updating schedule record:", error);
+      alert("אירעה שגיאה בעדכון מערכת השעות.");
+    }
+  }
+  
+  // אירועי משתמש וניווט
+  document.getElementById('studentSelect').addEventListener('change', async function () {
+    const studentId = this.value;
+    if (!studentId) return;
+    const studentRecord = await fetchStudentData(studentId);
+    if (studentRecord) {
+      const fields = studentRecord.fields;
+      const totalShaarei = Number(fields["מס' דפים שערי יצחק"] || 0);
+      const totalTorato = Number(fields["עבר"] || 0);
+      const totalApar = Number(fields["הפער"] || 0);
+      document.getElementById('shaareiValue').textContent = totalShaarei;
+      document.getElementById('toratoValue').textContent = totalTorato;
+      document.getElementById('aparValue').textContent = totalApar;
+      document.getElementById('pageHeader').textContent = `הרה"ח ${fields["פרטי ומשפחה"] || 'תלמיד'} הי"ו`;
+      // טוענים גם את הערך של "מחפש שותף" לתיבת הטקסט
+      document.getElementById('partnerField').value = fields["מחפש שותף"] || "";
+    }
+    const records = await fetchReportData(studentId);
+    renderReportTable(records);
+    const records2 = await fetchReportData2(studentId);
+    renderReportTable2(records2);
+    // כברירת מחדל, הגדרת תיבת הסינון ל-"checked" והפעלת הסינון
+    document.getElementById('filterShaarei').value = "checked";
+    applyFilter();
+  });
+  
+  document.getElementById('nextBtn').addEventListener('click', function () {
+    const select = document.getElementById('studentSelect');
+    const options = Array.from(select.options);
+    const currentIndex = options.findIndex(option => option.selected);
+    if (currentIndex < options.length - 1) {
+      select.selectedIndex = currentIndex + 1;
+      select.dispatchEvent(new Event('change'));
+    } else {
+      alert('אין תלמיד הבא.');
+    }
+  });
+  
+  document.getElementById('prevBtn').addEventListener('click', function () {
+    const select = document.getElementById('studentSelect');
+    const options = Array.from(select.options);
+    const currentIndex = options.findIndex(option => option.selected);
+    if (currentIndex > 1) {
+      select.selectedIndex = currentIndex - 1;
+      select.dispatchEvent(new Event('change'));
+    } else {
+      alert('אין תלמיד קודם.');
+    }
+  });
+  
+  const filterBtn = document.getElementById('filterBtn');
+  const filterContainer = document.getElementById('filterContainer');
+  const closeFilterBox = document.getElementById('closeFilterBox');
+  
+  filterBtn.addEventListener('click', (event) => {
+    event.stopPropagation();
+    filterContainer.style.display = 'block';
+    const btnRect = filterBtn.getBoundingClientRect();
+    const filterBox = document.getElementById('filterBox');
+    const filterBoxHeight = filterBox.offsetHeight;
+    filterContainer.style.position = 'fixed';
+    filterContainer.style.top = (btnRect.top - filterBoxHeight) + 'px';
+    filterContainer.style.left = btnRect.left + 'px';
+    filterContainer.style.right = 'auto';
+  });
+  
+  closeFilterBox.addEventListener('click', (event) => {
+    event.stopPropagation();
+    filterContainer.style.display = 'none';
+  });
+  
+  document.getElementById('applyFilterBtn').addEventListener('click', (event) => {
+    event.stopPropagation();
+    applyFilter();
+  });
+  document.getElementById('clearFilterBtn').addEventListener('click', (event) => {
+    event.stopPropagation();
+    clearFilter();
+  });
+  
+  document.addEventListener('click', (event) => {
+    if (!filterContainer.contains(event.target) && !filterBtn.contains(event.target)) {
+      filterContainer.style.display = 'none';
+    }
+  });
+  
+  const backToTopBtn = document.getElementById('backToTop');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 200) {
+      backToTopBtn.style.display = 'flex';
+    } else {
+      backToTopBtn.style.display = 'none';
+    }
+  });
+  backToTopBtn.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  
+  // כפתור "שמירה ומעבר לטבלה השנייה" – כולל פופאפ המתנה עם טיימר ועיכוב של 20 שניות
+  document.getElementById('saveAllBtn').addEventListener('click', async function () {
+    const studentSelect = document.getElementById('studentSelect');
+    const studentId = studentSelect.value;
+    if (!studentId) {
+      alert('אנא בחר תלמיד תחילה.');
+      return;
+    }
+    
+    // מציגים את פופאפ ההמתנה עם טיימר
+    const popup = document.getElementById('popupWait');
+    let secondsLeft = 20;
+    popup.innerHTML = `<p>השינויים נשמרו. אנא המתן <span id="timerCountdown">${secondsLeft}</span> שניות למעבר לטבלה השנייה...</p>`;
+    popup.style.display = 'block';
+    
+    const intervalId = setInterval(() => {
+      secondsLeft--;
+      document.getElementById('timerCountdown').textContent = secondsLeft;
+      if (secondsLeft <= 0) {
+        clearInterval(intervalId);
+      }
+    }, 1000);
+    
+    // מבצעים את העדכונים בשדה "שערי יצחק" וגם מעדכנים את "מחפש שותף"
+    await updateRecords();
+    await updatePartnerField();
+    try {
+      await fetch(`https://your-webhook-url.com/?studentId=${encodeURIComponent(studentId)}`);
+    } catch (error) {
+      console.error('Error sending webhook:', error);
+    }
+    
+    // לאחר 20 שניות – מבצעים את המעבר לטבלה השנייה
+    setTimeout(async () => {
+      popup.style.display = 'none';
+      document.getElementById('table1Container').style.display = 'none';
+      document.getElementById('table2Container').style.display = 'block';
+      document.getElementById('fullWidthSchedule').style.display = 'block';
+      
+      const records2 = await fetchReportData2(studentId);
+      renderReportTable2(records2);
+      const scheduleRecords = await fetchScheduleData(studentId);
+      renderScheduleTable(scheduleRecords);
+    }, 20000);
+  });
+  
+  // כפתור "מעבר לטבלה השנייה" – מעבר בלבד ללא שמירה או שליחת וובוק
+  document.getElementById('topTransitionBtn').addEventListener('click', async function () {
+    const studentSelect = document.getElementById('studentSelect');
+    const studentId = studentSelect.value;
+    if (!studentId) {
+      alert('אנא בחר תלמיד תחילה.');
+      return;
+    }
+    document.getElementById('fullWidthSchedule').style.display = 'block';
+    document.getElementById('table1Container').style.display = 'none';
+    document.getElementById('table2Container').style.display = 'block';
+    const records2 = await fetchReportData2(studentId);
+    renderReportTable2(records2);
+    const scheduleRecords = await fetchScheduleData(studentId);
+    renderScheduleTable(scheduleRecords);
+  });
+  
+  // כפתור "שמירה" בטבלה השנייה – מעדכן גם את שדות "הכנה לדוח", מערכת השעות, וגם "מחפש שותף"
+  document.getElementById('saveAllBtn2').addEventListener('click', async function () {
+    await updateRecords2();
+    await updateScheduleData();
+    await updatePartnerField();
+    alert("השינויים עודכנו בהצלחה.");
+  });
+  
+  // כפתור "חזרה לטבלה הראשונה" – מסתיר את מערכת השעות
+  document.getElementById('backToTable1').addEventListener('click', function () {
+    document.getElementById('table2Container').style.display = 'none';
+    document.getElementById('table1Container').style.display = 'block';
+    document.getElementById('fullWidthSchedule').style.display = 'none';
+  });
+  
+  // כפתור "רענן" – מושם בשורת ה-H2, ומבצע קריאות API מחדש לכל הנתונים, כולל עדכון "מחפש שותף"
+  document.getElementById('refreshBtn').addEventListener('click', async function () {
+    const studentId = document.getElementById('studentSelect').value;
+    if (!studentId) {
+      alert('אין תלמיד נבחר. אנא בחר תלמיד תחילה.');
+      return;
+    }
+    const records2 = await fetchReportData2(studentId);
+    renderReportTable2(records2);
+    const scheduleRecords = await fetchScheduleData(studentId);
+    renderScheduleTable(scheduleRecords);
+    // מעדכנים גם את שדה "מחפש שותף"
+    const studentRecord = await fetchStudentData(studentId);
+    if (studentRecord) {
+      document.getElementById('partnerField').value = studentRecord.fields["מחפש שותף"] || "";
+    }
+    alert("בוצע רענון ידני של הנתונים.");
+  });
+  
+  // אתחול
+  (async function init() {
+    await populateStudentDropdown();
+    document.getElementById('fullWidthSchedule').style.display = 'none';
+  })();
+</script>
+
+</body>
+</html>
